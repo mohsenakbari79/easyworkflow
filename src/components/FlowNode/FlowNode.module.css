@@ -1,0 +1,216 @@
+/* ====== Base Node ====== */
+.node {
+  background: var(--ef-card-bg);
+  border: 1px solid var(--ef-border-color);
+  border-radius: var(--ef-radius-lg);
+  box-shadow: var(--ef-shadow-sm);
+  transition:
+    box-shadow var(--ef-transition-base),
+    transform var(--ef-transition-base),
+    border-color var(--ef-transition-base);
+  cursor: pointer;
+  position: relative;
+  overflow: visible;
+}
+
+.node:hover {
+  box-shadow: var(--ef-shadow-md);
+  border-color: var(--ef-border-strong);
+}
+
+.node.selected {
+  box-shadow: 0 0 0 2px var(--ef-primary), var(--ef-shadow-lg);
+  transform: scale(1.03);
+}
+
+/* ====== Sizes ====== */
+.sizeSmall  { min-width: 50px;  max-width: 120px; }
+.sizeMedium { min-width: 160px; max-width: 200px; }
+.sizeLarge  { min-width: 220px; max-width: 280px; }
+
+/* ====== Rectangle ====== */
+.shapeRectangle { border-radius: var(--ef-radius-lg); }
+
+/* ====== Ellipse (Start/End) ====== */
+.shapeEllipse {
+  border-radius: var(--ef-radius-full);
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.shapeEllipse .header {
+  border-radius: var(--ef-radius-full);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0.2rem;
+}
+.shapeEllipse .body { display: none; }
+
+/* ====== Diamond (Operators) ====== */
+.shapeDiamond {
+  width: 50px;
+  height: 50px;
+  transform: rotate(45deg);
+  border-radius: var(--ef-radius-xl);
+  overflow: visible;
+}
+.shapeDiamond .header {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  border-radius: var(--ef-radius-lg);
+}
+.shapeDiamond .title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  transform: rotate(-45deg);
+  margin: 0;
+  margin-top: 12px;
+  margin-left: 14px;
+}
+.shapeDiamond .icon { display: none; }
+.shapeDiamond .body { display: none; }
+.shapeDiamond .handle { transform: rotate(-45deg); }
+
+/* ====== Down Triangle (binary operators) ====== */
+.shapeDowntriangle {
+  width: 70px;
+  height: 60px;
+  position: relative;
+  background: transparent;
+  border: none !important;
+  box-shadow: none !important;
+  overflow: visible;
+}
+.shapeDowntriangle::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 35px solid transparent;
+  border-right: 35px solid transparent;
+  border-top: 60px solid var(--node-color, #6366f1);
+  border-radius: var(--ef-radius-sm);
+  filter: var(--node-status-shadow, drop-shadow(0 4px 6px rgba(15, 23, 42, 0.15)));
+  pointer-events: none;
+}
+.shapeDowntriangle .header {
+  width: 100%;
+  position: absolute;
+  top: 12px;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px;
+  background: transparent !important;
+  z-index: 1;
+}
+.shapeDowntriangle .title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  transform: none;
+  margin: 0;
+}
+.shapeDowntriangle .icon { display: none; }
+.shapeDowntriangle .body { display: none; }
+.shapeDowntriangle .handleCornerRight { left: 94% !important; top: -6px !important; }
+.shapeDowntriangle .handleCornerLeft  { margin: -1px -18px !important; top: -6px !important; }
+.shapeDowntriangle .handle {
+  transform: none;
+  margin: -1px -8px;
+  opacity: 1 !important;
+}
+
+/* ====== Content ====== */
+.header {
+  padding: 4px 6px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: var(--ef-text-sm);
+  letter-spacing: -0.01em;
+}
+.shapeRectangle .header {
+  border-radius: calc(var(--ef-radius-lg) - 1px) calc(var(--ef-radius-lg) - 1px) 0 0;
+}
+.icon {
+  font-size: 15px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+.title {
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.1;
+}
+.body {
+  padding: 3px 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ef-text-muted);
+  text-align: center;
+  background: var(--ef-bg-secondary);
+  border-radius: 0 0 calc(var(--ef-radius-lg) - 1px) calc(var(--ef-radius-lg) - 1px);
+}
+.category {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 10px;
+}
+
+/* ====== Handles ====== */
+.handle {
+  width: 14px !important;
+  height: 14px !important;
+  background: var(--ef-primary) !important;
+  border: 2px solid var(--ef-card-bg) !important;
+  box-shadow: 0 0 0 1px var(--ef-border-strong), var(--ef-shadow-xs);
+  transition: transform var(--ef-transition-fast);
+}
+.handle:hover {
+  transform: scale(1.15);
+}
+
+/* Touch devices: larger handles for easier tapping */
+@media (hover: none) and (pointer: coarse) {
+  .handle {
+    width: 18px !important;
+    height: 18px !important;
+  }
+}
+
+.handleBinary {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+/* Global handle position overrides */
+:global(.react-flow__handle-top)    { top: -13px !important; }
+:global(.react-flow__handle-bottom) { bottom: -13px !important; }

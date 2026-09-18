@@ -1,0 +1,50 @@
+.btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btnPrimary {
+  background: var(--ef-primary);
+  color: white;
+}
+
+.btnSecondary {
+  background: var(--ef-secondary);
+  color: white;
+}
+
+.btnInfo {
+  background: var(--ef-info);
+  color: white;
+}
+
+.btnSuccess {
+  background: var(--ef-success);
+  color: white;
+}
+
+.btnDanger {
+  background: var(--ef-danger);
+  color: white;
+}
+
+.btnWarning {
+  background: var(--ef-warning);
+  color: white;
+}

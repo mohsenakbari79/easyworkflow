@@ -1,0 +1,324 @@
+/* ====== Palette ====== */
+.palette {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.paletteHeader {
+  padding: 1rem 1rem 0.75rem;
+  border-bottom: 1px solid var(--ef-border-color);
+  background: var(--ef-card-bg);
+}
+.paletteTitle {
+  font-size: var(--ef-text-lg);
+  font-weight: 600;
+  margin: 0 0 0.125rem 0;
+  color: var(--ef-text-color);
+  letter-spacing: -0.01em;
+}
+.paletteHint {
+  font-size: var(--ef-text-xs);
+  color: var(--ef-text-muted);
+  font-weight: 500;
+}
+
+/* Search */
+.searchWrapper {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--ef-border-color);
+  background: var(--ef-card-bg);
+}
+.searchInput {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--ef-input-border);
+  border-radius: var(--ef-radius-md);
+  background: var(--ef-input-bg);
+  color: var(--ef-text-color);
+  font-size: var(--ef-text-base);
+  outline: none;
+  transition: border-color var(--ef-transition-fast), box-shadow var(--ef-transition-fast);
+}
+.searchInput::placeholder { color: var(--ef-text-muted); }
+.searchInput:focus {
+  border-color: var(--ef-primary);
+  box-shadow: var(--ef-shadow-focus);
+}
+
+/* List */
+.list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.75rem;
+  max-height: calc(100vh - 280px);
+}
+.list::-webkit-scrollbar { width: 8px; }
+.list::-webkit-scrollbar-track { background: transparent; }
+.list::-webkit-scrollbar-thumb {
+  background: var(--ef-border-strong);
+  border-radius: var(--ef-radius-full);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.list::-webkit-scrollbar-thumb:hover { background: var(--ef-text-muted); background-clip: padding-box; }
+
+/* Category tree */
+.tree { display: flex; flex-direction: column; gap: 0.375rem; }
+.category { margin-bottom: 0.25rem; }
+.categoryLevel0 { margin-bottom: 0.75rem; }
+.categoryLevel1 { margin-top: 0.25rem; }
+.categoryLevel2,
+.categoryLevel3 { margin-top: 0.25rem; }
+
+/* Category toggle */
+.categoryToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--ef-border-color);
+  border-radius: var(--ef-radius-md);
+  background: var(--ef-bg);
+  cursor: pointer;
+  transition: background var(--ef-transition-fast),
+              border-color var(--ef-transition-fast),
+              box-shadow var(--ef-transition-fast);
+  text-align: start;
+  color: inherit;
+  font-family: inherit;
+}
+.categoryToggle:hover {
+  background: var(--ef-hover-bg);
+  border-color: var(--ef-border-strong);
+}
+.categoryToggle:focus-visible {
+  outline: none;
+  box-shadow: var(--ef-shadow-focus);
+  border-color: var(--ef-primary);
+}
+.toggleIcon {
+  font-size: 0.75rem;
+  color: var(--ef-text-muted);
+  width: 12px;
+  min-width: 12px;
+  text-align: center;
+  transition: transform var(--ef-transition-fast);
+}
+.categoryTitle {
+  flex: 1;
+  font-size: var(--ef-text-sm);
+  font-weight: 600;
+  color: var(--ef-text-color);
+  min-width: 0;
+  letter-spacing: -0.005em;
+}
+.categoryBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 0.4rem;
+  border-radius: var(--ef-radius-full);
+  background: var(--ef-primary-soft);
+  color: var(--ef-primary);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Children */
+.categoryChildren {
+  margin-top: 0.375rem;
+  position: relative;
+}
+.categoryLevel0 > .categoryChildren {
+  margin-inline-start: 0.75rem;
+  padding-inline-start: 0.75rem;
+  border-inline-start: 2px solid var(--ef-border-color);
+}
+.categoryLevel1 > .categoryChildren {
+  margin-inline-start: 0.5rem;
+  padding-inline-start: 0.75rem;
+  border-inline-start: 1px dashed var(--ef-border-color);
+}
+.categoryLevel2 > .categoryChildren,
+.categoryLevel3 > .categoryChildren {
+  margin-inline-start: 0.5rem;
+  padding-inline-start: 0.75rem;
+  border-inline-start: 1px dashed var(--ef-border-color);
+}
+
+/* Level-specific category toggles */
+.categoryLevel1 > .categoryToggle {
+  padding: 0.45rem 0.65rem;
+  background: var(--ef-bg);
+  border-color: var(--ef-border-color);
+}
+.categoryLevel1 > .categoryToggle .categoryTitle {
+  font-size: var(--ef-text-sm);
+  font-weight: 600;
+  color: var(--ef-text-secondary);
+}
+.categoryLevel1 > .categoryToggle .categoryBadge {
+  background: var(--ef-bg-secondary);
+  color: var(--ef-text-secondary);
+  min-width: 20px;
+  height: 20px;
+  font-size: 10px;
+}
+
+.categoryLevel2 > .categoryToggle,
+.categoryLevel3 > .categoryToggle {
+  padding: 0.4rem 0.6rem;
+  background: transparent;
+  border-color: transparent;
+  border-radius: var(--ef-radius-sm);
+}
+.categoryLevel2 > .categoryToggle:hover,
+.categoryLevel3 > .categoryToggle:hover {
+  background: var(--ef-hover-bg);
+  border-color: transparent;
+}
+.categoryLevel2 > .categoryToggle .categoryTitle,
+.categoryLevel3 > .categoryToggle .categoryTitle {
+  font-size: var(--ef-text-sm);
+  font-weight: 500;
+  color: var(--ef-text-secondary);
+}
+.categoryLevel2 > .categoryToggle .categoryBadge,
+.categoryLevel3 > .categoryToggle .categoryBadge {
+  background: transparent;
+  color: var(--ef-text-muted);
+  min-width: 18px;
+  height: 18px;
+  font-size: 10px;
+  padding: 0;
+}
+
+/* Cards */
+.items { margin-top: 0.375rem; display: flex; flex-direction: column; gap: 0.375rem; }
+.item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  background: var(--ef-bg);
+  border: 1px solid var(--ef-border-color);
+  border-radius: var(--ef-radius-md);
+  cursor: pointer;
+  transition: background var(--ef-transition-fast),
+              border-color var(--ef-transition-fast),
+              box-shadow var(--ef-transition-fast),
+              transform var(--ef-transition-fast);
+  text-align: start;
+  font-family: inherit;
+  color: inherit;
+}
+.item:hover {
+  background: var(--ef-bg);
+  border-color: var(--ef-primary);
+  box-shadow: var(--ef-shadow-sm);
+}
+@media (hover: hover) and (pointer: fine) {
+  .item:hover {
+    transform: translateY(-1px);
+  }
+}
+.item:active { transform: translateY(0); }
+.item:focus-visible {
+  outline: none;
+  border-color: var(--ef-primary);
+  box-shadow: var(--ef-shadow-focus);
+}
+.itemIcon {
+  font-size: 1.25rem;
+  line-height: 1;
+  min-width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ef-bg-secondary);
+  border-radius: var(--ef-radius-sm);
+  flex-shrink: 0;
+}
+.texts { flex: 1; min-width: 0; }
+.itemTitle {
+  font-weight: 600;
+  font-size: var(--ef-text-sm);
+  color: var(--ef-text-color);
+  margin-bottom: 2px;
+  letter-spacing: -0.005em;
+}
+.itemDesc {
+  font-size: var(--ef-text-xs);
+  color: var(--ef-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.35;
+}
+.empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--ef-text-muted);
+  font-size: var(--ef-text-sm);
+}
+.empty p { margin: 0 0 0.5rem 0; font-weight: 500; color: var(--ef-text-secondary); }
+
+/* ====== Responsive: Tablet (max-width 900px) ====== */
+@container ef-root (max-width: 900px) {
+  .paletteHeader {
+    padding: var(--ef-space-3) var(--ef-space-3) var(--ef-space-3);
+  }
+  .searchWrapper {
+    padding: var(--ef-space-3);
+  }
+  .list {
+    max-height: none;
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+/* ====== Responsive: Mobile (max-width 640px) ====== */
+@container ef-root (max-width: 640px) {
+  .paletteHeader {
+    padding: var(--ef-space-3);
+  }
+  .searchWrapper {
+    padding: var(--ef-space-3);
+  }
+  .list {
+    max-height: none;
+    flex: 1;
+    min-height: 0;
+  }
+  .categoryToggle {
+    padding: var(--ef-space-2) 0.625rem;
+    min-height: var(--ef-tap-target);
+  }
+  .item {
+    padding: var(--ef-space-2) 0.625rem;
+    gap: var(--ef-space-2);
+  }
+  .itemIcon {
+    min-width: 24px;
+    height: 24px;
+    font-size: 1rem;
+  }
+  .categoryLevel0 > .categoryChildren {
+    margin-inline-start: 0.5rem;
+    padding-inline-start: 0.5rem;
+  }
+  .categoryLevel1 > .categoryChildren {
+    margin-inline-start: 0.375rem;
+    padding-inline-start: 0.5rem;
+  }
+}

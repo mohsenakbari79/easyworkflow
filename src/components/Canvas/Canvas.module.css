@@ -1,0 +1,63 @@
+.canvas {
+  flex: 1;
+  background: var(--ef-bg-subtle);
+  border-radius: var(--ef-radius-xl);
+  overflow: hidden;
+  border: 1px solid var(--ef-border-color);
+  box-shadow: var(--ef-shadow-sm);
+  min-height: 400px;
+  position: relative;
+}
+
+/* Subtle refinement of React Flow internals */
+.canvas :global(.react-flow__controls) {
+  border-radius: var(--ef-radius-md);
+  overflow: hidden;
+  box-shadow: var(--ef-shadow-sm);
+  border: 1px solid var(--ef-border-color);
+}
+.canvas :global(.react-flow__controls-button) {
+  background: var(--ef-card-bg);
+  border-bottom: 1px solid var(--ef-border-color);
+  color: var(--ef-text-color);
+  transition: background var(--ef-transition-fast);
+}
+.canvas :global(.react-flow__controls-button:hover) {
+  background: var(--ef-hover-bg);
+}
+.canvas :global(.react-flow__minimap) {
+  border-radius: var(--ef-radius-md);
+  overflow: hidden;
+  border: 1px solid var(--ef-border-color);
+  box-shadow: var(--ef-shadow-sm);
+}
+.canvas :global(.react-flow__attribution) {
+  background: transparent;
+  color: var(--ef-text-muted);
+  font-size: 10px;
+}
+
+/* Touch-friendly controls */
+.canvas :global(.react-flow__controls-button) {
+  min-width: 32px;
+  min-height: 32px;
+}
+
+/* ====== Responsive: Mobile (max-width 640px) ====== */
+@container ef-root (max-width: 640px) {
+  .canvas {
+    border-radius: var(--ef-radius-lg);
+    min-height: 260px;
+  }
+  .canvas :global(.react-flow__controls-button) {
+    min-width: 40px;
+    min-height: 40px;
+  }
+}
+
+/* ====== Responsive: Very small (max-width 480px) — hide minimap ====== */
+@container ef-root (max-width: 480px) {
+  .canvas :global(.react-flow__minimap) {
+    display: none;
+  }
+}
