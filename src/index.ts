@@ -17,7 +17,7 @@ export * from './utils';
 
 // Components
 export { WorkflowEditor } from './components/WorkflowEditor';
-export type { ToolbarAction } from './components/WorkflowEditor';
+export type { ToolbarAction, WorkflowActionItem } from './components/WorkflowEditor';
 export { FlowNode } from './components/FlowNode';
 export { Canvas } from './components/Canvas';
 export { Palette } from './components/Palette';

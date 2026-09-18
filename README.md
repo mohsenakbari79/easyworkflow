@@ -105,6 +105,105 @@ Run `npm run dev`. You now have a working workflow editor with:
 
 ---
 
+## Cards and Adapters
+
+The editor needs two things:
+
+1. A list of **cards** (the available node types users can drag onto the canvas)
+2. An **adapter** that tells the editor how to load/save/execute workflows
+
+### The problem with `noopAdapter`
+
+The bundled `noopAdapter` returns an **empty cards array**. It is only useful
+for render tests, not for real usage. If you pass `noopAdapter` plus
+`initialCards`, the editor will still show zero cards, because the adapter
+takes priority over `initialCards`.
+
+### Build your own adapter
+
+Create an adapter that supplies your cards and talks to your backend:
+
+    import type { APIAdapter, CardDefinition } from 'easyworkflow';
+
+    const myCards: CardDefinition[] = [
+      {
+        id: 1,
+        card_key: 'control.start',
+        node_type: 'control.start',
+        display_name: 'Start',
+        display_name_i18n: { en: 'Start', fa: 'شروع', ar: 'بدء' },
+        icon: '🟢',
+        category: 'control',
+        ui_config: { shape: 'ellipse', color: '#10b981', size: 'small' },
+      },
+      // ... more cards
+    ];
+
+    const cardsAdapter: APIAdapter = {
+      // REQUIRED for cards to appear:
+      getCards: () => Promise.resolve(myCards),
+
+      // Optional:
+      syncCards: () =>
+        Promise.resolve({ created: 0, updated: 0, total: myCards.length }),
+
+      loadWorkflow: (id) =>
+        fetch(`/api/workflows/${id}`).then((r) => r.json()),
+
+      saveWorkflow: (wf) =>
+        fetch('/api/workflows', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(wf),
+        }).then((r) => r.json()),
+
+      validateWorkflow: (id) =>
+        fetch(`/api/workflows/${id}/validate`, { method: 'POST' }).then((r) =>
+          r.json()
+        ),
+
+      executeWorkflow: (id) =>
+        fetch(`/api/workflows/${id}/execute`, { method: 'POST' }).then(
+          () => undefined
+        ),
+
+      getWorkflowStatus: (id) =>
+        fetch(`/api/workflows/${id}/status`).then((r) => r.json()),
+    };
+
+Then pass it to the editor:
+
+    <WorkflowEditor adapter={cardsAdapter} onSave={(wf) => console.log(wf)} />
+
+### Static-only usage (no backend)
+
+If you only want to show cards and don't need backend calls, use a minimal
+adapter:
+
+    const staticAdapter: APIAdapter = {
+      getCards: () => Promise.resolve(myCards),
+      saveWorkflow: (wf) => {
+        console.log('Saved:', wf);
+        return Promise.resolve({ id: 'local', ...wf });
+      },
+    };
+
+    <WorkflowEditor adapter={staticAdapter} />
+
+### Using `initialCards` without an adapter
+
+If you want to skip the adapter entirely and just render some cards, pass
+`initialCards` and **do not pass an adapter**:
+
+    <WorkflowEditor
+      initialCards={myCards}
+      onSave={(wf) => console.log(wf)}
+    />
+
+Note: with this mode, sync/load/execute features will not be available.
+
+---
+
 ## Features
 
 | Feature | Description |
@@ -169,6 +268,91 @@ Register a component for a specific node type or pattern:
     );
 
 The editor receives `{ node, onUpdate, onDelete, onCancel, variableSuggestions }`.
+
+---
+
+## Toolbar Actions
+
+By default, only a **Save** button is shown. To fully control the toolbar,
+pass an `actions` array. Each action defines its own label, icon, variant,
+and onClick handler — just like `cards`.
+
+    import { WorkflowEditor } from 'easyworkflow';
+
+    <WorkflowEditor
+      adapter={cardsAdapter}
+      actions={[
+        {
+          key: 'save',
+          label: 'Save Draft',
+          icon: '💾',
+          variant: 'primary',
+          onClick: async (ctx) => {
+            await api.saveDraft(ctx);
+          },
+        },
+        {
+          key: 'publish',
+          label: 'Publish',
+          icon: '🚀',
+          variant: 'success',
+          onClick: async (ctx) => {
+            await api.publish(ctx);
+          },
+        },
+        {
+          key: 'discard',
+          label: 'Discard',
+          icon: '🗑️',
+          variant: 'danger',
+          onClick: () => {
+            if (confirm('Discard changes?')) location.reload();
+          },
+        },
+      ]}
+    />
+
+The `onClick` callback receives:
+
+    {
+      workflowId: string | undefined;
+      name: string;             // current workflow name
+      type: string;             // current workflow type
+      nodes: EasyFlowNode[];    // current nodes
+      edges: EasyFlowEdge[];    // current edges
+      adapter: APIAdapter | undefined;
+    }
+
+### Disable or hide a single action
+
+    {
+      key: 'publish',
+      label: 'Publish',
+      onClick: publish,
+      disabled: !isValid,     // grey out
+      visible: hasPermission, // remove entirely when false
+    }
+
+### Add extra buttons without replacing defaults
+
+Use `toolbarActions` to append buttons after `actions`:
+
+    <WorkflowEditor
+      toolbarActions={[
+        {
+          key: 'export',
+          label: 'Export JSON',
+          icon: '📤',
+          variant: 'secondary',
+          onClick: () => downloadJSON(),
+        },
+      ]}
+    />
+
+### Default behavior
+
+If you don't pass `actions`, the editor renders a single Save button that
+uses the built-in save handler.
 
 ---
 

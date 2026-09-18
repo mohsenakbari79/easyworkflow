@@ -42,12 +42,49 @@ export interface ToolbarAction {
   hidden?: boolean;
 }
 
+/**
+ * A fully customizable toolbar action.
+ * When `actions` is provided on the editor, these replace all default buttons.
+ */
+export interface WorkflowActionItem {
+  /** Unique key for React reconciliation. */
+  key: string;
+  /** Button label (already localized by the caller). */
+  label: string;
+  /** Optional emoji or short text shown before the label. */
+  icon?: string;
+  /** Visual style. Default: 'secondary'. */
+  variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'warning' | 'info';
+  /**
+   * Click handler. Receives the current workflow context so the caller
+   * can read/write nodes, edges, name, type, and the adapter.
+   */
+  onClick: (ctx: {
+    workflowId?: string;
+    name: string;
+    type: string;
+    nodes: EasyFlowNode[];
+    edges: EasyFlowEdge[];
+    adapter?: APIAdapter;
+  }) => void | Promise<void>;
+  /** Optional disable flag. */
+  disabled?: boolean;
+  /** Optional visibility flag (default: true). Set to false to hide. */
+  visible?: boolean;
+}
+
 export interface WorkflowEditorProps {
   workflowId?: string;
   adapter?: APIAdapter;
   initialCards?: CardDefinition[];
   locale?: string;
   customEditors?: { match: string | ((nodeType: string) => boolean); component: NodeEditorComponent; key: string }[];
+  /**
+   * Define the toolbar actions. If omitted, only a default Save button renders.
+   * When provided, renders exactly these actions — no built-in buttons are injected.
+   */
+  actions?: WorkflowActionItem[];
+  /** @deprecated Prefer `actions`. Legacy extra buttons appended after `actions`. */
   toolbarActions?: ToolbarAction[];
   onSave?: (workflow: { id?: string; name: string; type: string; nodes: EasyFlowNode[]; edges: EasyFlowEdge[] }) => void;
   onExecute?: (workflowId: string) => void;
@@ -61,6 +98,7 @@ function WorkflowEditorInner({
   adapter,
   initialCards = [],
   customEditors = [],
+  actions,
   toolbarActions = [],
   onSave,
   onExecute,
@@ -427,6 +465,24 @@ function WorkflowEditorInner({
     return nodeEditorRegistry.resolve(nodeType);
   }, [selectedNode]);
 
+  // Build the effective actions list
+  const effectiveActions: WorkflowActionItem[] = useMemo(() => {
+    if (actions && actions.length > 0) return actions;
+    // Default: only Save, using the built-in handler
+    return [
+      {
+        key: 'save',
+        label: isSaving
+          ? t('buttons.saving', 'Saving...')
+          : t('buttons.save', 'Save'),
+        icon: '💾',
+        variant: 'primary',
+        onClick: async () => { await handleSave(); },
+        disabled: isSaving,
+      },
+    ];
+  }, [actions, isSaving, t, handleSave]);
+
   if (isLoading) {
     return (
     <div className={`ef-root ${styles.container}`} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -459,27 +515,34 @@ function WorkflowEditorInner({
           </div>
         </div>
         <div className={styles.headerActions}>
+          {effectiveActions
+            .filter((a) => a.visible !== false)
+            .map((a) => (
+              <button
+                key={a.key}
+                className={`ef-btn ef-btn-${a.variant || 'secondary'}`}
+                disabled={a.disabled}
+                onClick={() =>
+                  a.onClick({
+                    workflowId,
+                    name: workflowName || t('workflow.untitled', 'Untitled Workflow'),
+                    type: workflowType,
+                    nodes: nodesRef.current as EasyFlowNode[],
+                    edges: edgesRef.current as EasyFlowEdge[],
+                    adapter,
+                  })
+                }
+              >
+                {a.icon && `${a.icon} `}
+                {a.label}
+              </button>
+            ))}
+
           {toolbarActions.filter((a) => !a.hidden).map((action) => (
             <button key={action.key} className={`ef-btn ef-btn-${action.variant || 'secondary'}`} onClick={action.onClick} disabled={action.disabled}>
               {action.icon && `${action.icon} `}{action.label}
             </button>
           ))}
-          {onBack && <button className="ef-btn ef-btn-secondary" onClick={onBack}>← {t('buttons.back', 'Back')}</button>}
-          {adapter?.syncCards && (
-            <button className="ef-btn ef-btn-warning" onClick={handleSync} disabled={isSyncing}>
-              {isSyncing ? t('buttons.syncing', 'Syncing...') : t('buttons.sync', 'Update cards')}
-            </button>
-          )}
-          <button className="ef-btn ef-btn-secondary" onClick={handleReset}>{t('buttons.reset', 'Reset')}</button>
-          <button className="ef-btn ef-btn-primary" onClick={handleSave} disabled={isSaving}>
-            {isSaving ? t('buttons.saving', 'Saving...') : t('buttons.save', 'Save')}
-          </button>
-          <button className="ef-btn ef-btn-info" onClick={handleValidate}>{t('buttons.validate', 'Validate')}</button>
-          {onExecute && (
-            <button className="ef-btn ef-btn-success" onClick={handleExecute} disabled={isExecuting}>
-              {isExecuting ? t('buttons.executing', 'Executing...') : t('buttons.execute', 'Execute')}
-            </button>
-          )}
         </div>
       </header>
 

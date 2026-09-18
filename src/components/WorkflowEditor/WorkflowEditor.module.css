@@ -112,6 +112,8 @@
 
 .canvas {
   flex: 1;
+  display: flex;
+  min-height: 0;
   background: var(--ef-card-bg);
   border-radius: var(--ef-radius-xl);
   overflow: hidden;
