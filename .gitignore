@@ -40,3 +40,4 @@ Desktop.ini
 *.temp
 output.txt
 *.tgz
+dist/
