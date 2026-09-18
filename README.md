@@ -2,7 +2,7 @@
 
 > A fully configurable, i18n-ready visual workflow editor for React.
 > Drag-and-drop nodes, custom editors, adapter-based backend, MIT licensed.
-
+[![npm version](https://img.shields.io/npm/v/@malevin/easyworkflow.svg)](https://www.npmjs.com/package/@malevin/easyworkflow)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 
@@ -21,7 +21,7 @@
 
 ## Installation
 
-    npm install easyworkflow @xyflow/react
+    npm install @malevin/easyworkflow @xyflow/react
 
 `@xyflow/react` is a peer dependency and must be installed separately.
 
