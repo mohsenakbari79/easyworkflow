@@ -468,8 +468,15 @@ function WorkflowEditorInner({
   // Build the effective actions list
   const effectiveActions: WorkflowActionItem[] = useMemo(() => {
     if (actions && actions.length > 0) return actions;
-    // Default: only Save, using the built-in handler
+    // Default: Save + Reset
     return [
+      {
+        key: 'reset',
+        label: t('buttons.reset', 'Reset'),
+        icon: '🗑️',
+        variant: 'secondary',
+        onClick: () => { handleReset(); },
+      },
       {
         key: 'save',
         label: isSaving
@@ -481,7 +488,7 @@ function WorkflowEditorInner({
         disabled: isSaving,
       },
     ];
-  }, [actions, isSaving, t, handleSave]);
+  }, [actions, isSaving, t, handleSave, handleReset]);
 
   if (isLoading) {
     return (

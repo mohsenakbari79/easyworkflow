@@ -33,5 +33,5 @@ export { en, fa, RTL_LOCALES } from './i18n';
 export { isRTLLocale } from './i18n/locales';
 
 // API
-export { noopAdapter } from './api';
+export { emptyAdapter, noopAdapter } from './api';
 export type { APIAdapter as APIAdapterType } from './api';

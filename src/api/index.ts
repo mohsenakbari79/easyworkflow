@@ -1,3 +1,5 @@
 export type { APIAdapter, Workflow, WorkflowPayload, ValidationResult, WorkflowStatus } from '../types/api';
-/** No-op adapter for demos and testing. */
-export { noopAdapter } from './noopAdapter';
+/** Empty adapter with no cards and no backend calls. */
+export { emptyAdapter } from './emptyAdapter';
+/** @deprecated Use `emptyAdapter` instead. */
+export { noopAdapter } from './emptyAdapter';

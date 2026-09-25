@@ -31,7 +31,7 @@
 
 ### Step 1 - Import the library
 
-    import { WorkflowEditor, EasyFlowI18nProvider, noopAdapter } from 'easyworkflow';
+    import { WorkflowEditor, EasyFlowI18nProvider, emptyAdapter } from 'easyworkflow';
     import 'easyworkflow/styles';
 
 ### Step 2 - Define your cards
@@ -79,16 +79,36 @@
 
 ### Step 3 - Render the editor
 
+    import { WorkflowEditor, EasyFlowI18nProvider, emptyAdapter } from 'easyworkflow';
+    import 'easyworkflow/styles';
+    import type { APIAdapter, CardDefinition } from 'easyworkflow';
+
+    const myCards: CardDefinition[] = [
+      {
+        id: 1,
+        card_key: 'start',
+        node_type: 'control.start',
+        display_name: 'Start',
+        display_name_i18n: { en: 'Start', fa: 'شروع' },
+        icon: '🟢',
+        category: 'control',
+        ui_config: { shape: 'ellipse', color: '#10b981', size: 'small' },
+      },
+    ];
+
+    const myAdapter: APIAdapter = {
+      getCards: () => Promise.resolve(myCards),
+      saveWorkflow: (wf) => {
+        console.log('Saved:', wf);
+        return Promise.resolve({ id: 'local', ...wf });
+      },
+    };
+
     export default function App() {
       return (
         <EasyFlowI18nProvider locale="fa">
           <div style={{ height: '100vh' }}>
-            <WorkflowEditor
-              adapter={noopAdapter}
-              initialCards={cards}
-              onSave={(workflow) => console.log('Saved:', workflow)}
-              onExecute={(id) => console.log('Execute:', id)}
-            />
+            <WorkflowEditor adapter={myAdapter} />
           </div>
         </EasyFlowI18nProvider>
       );
@@ -100,24 +120,15 @@ Run `npm run dev`. You now have a working workflow editor with:
 - Drag-and-drop canvas
 - Hierarchical card palette with search
 - Built-in node editor
-- Save / Execute / Validate toolbar
+- Save / Reset toolbar
 - Automatic RTL when locale is set to fa, ar, he, or ur
 
 ---
 
 ## Cards and Adapters
 
-The editor needs two things:
-
-1. A list of **cards** (the available node types users can drag onto the canvas)
-2. An **adapter** that tells the editor how to load/save/execute workflows
-
-### The problem with `noopAdapter`
-
-The bundled `noopAdapter` returns an **empty cards array**. It is only useful
-for render tests, not for real usage. If you pass `noopAdapter` plus
-`initialCards`, the editor will still show zero cards, because the adapter
-takes priority over `initialCards`.
+The adapter is the single source of truth for cards. Define your cards inside
+`getCards`, and put save/execute logic right next to it.
 
 ### Build your own adapter
 
@@ -190,18 +201,6 @@ adapter:
 
     <WorkflowEditor adapter={staticAdapter} />
 
-### Using `initialCards` without an adapter
-
-If you want to skip the adapter entirely and just render some cards, pass
-`initialCards` and **do not pass an adapter**:
-
-    <WorkflowEditor
-      initialCards={myCards}
-      onSave={(wf) => console.log(wf)}
-    />
-
-Note: with this mode, sync/load/execute features will not be available.
-
 ---
 
 ## Features
@@ -250,7 +249,7 @@ Implement `APIAdapter` to connect your backend:
 
     <WorkflowEditor adapter={myAdapter} />;
 
-If you do not need a backend, use the bundled `noopAdapter`.
+If you do not need a backend, use the bundled `emptyAdapter`.
 
 ---
 
@@ -446,7 +445,7 @@ Full variable reference: `src/styles/easyflow.css`.
 
 | Export | Description |
 |---|---|
-| `noopAdapter` | No-op adapter for demos and tests |
+| `emptyAdapter` | Empty adapter for demos and tests |
 
 ---
 
