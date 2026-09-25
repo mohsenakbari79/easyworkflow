@@ -6,6 +6,10 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 
+<p align="center">
+  <img src="assets/easyflow-preview.png" alt="easyworkflow editor preview" width="100%" />
+</p>
+
 ---
 
 ## Why easyworkflow?
