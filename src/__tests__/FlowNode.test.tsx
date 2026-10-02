@@ -127,20 +127,12 @@ describe('FlowNode', () => {
         />
       </ReactFlowProvider>
     );
-    const targets = container.querySelectorAll(
-      '.react-flow__handle[data-handlepos="top"], .react-flow__handle-top'
-    );
-    // React Flow sets data-handlepos; also count target handles via title/id.
-    const input0 = container.querySelector(
-      '[data-handle-id="input-0"], #input-0, [data-testid*="input-0"]'
-    );
-    const input1 = container.querySelector('#second-input, [data-handle-id="input-1"]');
-    const yesLabel = container.textContent?.includes('yes');
-    const noLabel = container.textContent?.includes('no');
-    expect(yesLabel).toBe(true);
-    expect(noLabel).toBe(true);
-    expect(input0 || targets.length >= 2).toBeTruthy();
-    expect(input1 || targets.length >= 2).toBeTruthy();
+    const input0 = container.querySelector('#input-0, [data-handle-id="input-0"]');
+    const input1 = container.querySelector('#input-1, [data-handle-id="input-1"]');
+    expect(input0).toBeTruthy();
+    expect(input1).toBeTruthy();
+    expect(container.textContent).toContain('yes');
+    expect(container.textContent).toContain('no');
   });
 
   it('renders three inputs on a rectangle (corners + middle)', () => {

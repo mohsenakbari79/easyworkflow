@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import type {
   EasyFlowNode,
   NodeEditorProps,
+  NodeHandleConfig,
   ParameterSchema,
 } from '../../../src';
 import { SchemaDrivenEditor, nodeEditorRegistry } from '../../../src';
@@ -51,6 +52,30 @@ const btnDanger: React.CSSProperties = {
   color: '#dc2626',
 };
 
+const handleRowStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: '1fr 90px 28px',
+  gap: 8,
+  alignItems: 'center',
+  marginBottom: 6,
+};
+
+const colorInputStyle: React.CSSProperties = {
+  ...inputStyle,
+  padding: 2,
+  height: 32,
+  width: '100%',
+};
+
+const sectionTitleStyle: React.CSSProperties = {
+  margin: '12px 0 8px',
+  fontSize: 12,
+  fontWeight: 700,
+  textTransform: 'uppercase',
+  letterSpacing: '0.04em',
+  color: 'var(--ef-text-muted, #64748b)',
+};
+
 function readParam(node: EasyFlowNode, key: string, fallback = ''): string {
   const value = node.data.parameters?.[key];
   return typeof value === 'string' ? value : fallback;
@@ -59,6 +84,117 @@ function readParam(node: EasyFlowNode, key: string, fallback = ''): string {
 function readNumberParam(node: EasyFlowNode, key: string, fallback: number): number {
   const value = node.data.parameters?.[key];
   return typeof value === 'number' ? value : fallback;
+}
+
+/**
+ * Editable handle settings — labels/colors/counts are fully dynamic.
+ * The backend can ship defaults via `uiConfig.handles`; the user can change
+ * them per node (match/skip, hit/miss, path-a/path-b, or anything else).
+ */
+export function HandleSettingsFields({
+  handles,
+  onChange,
+}: {
+  handles: NodeHandleConfig | undefined;
+  onChange: (next: NodeHandleConfig) => void;
+}) {
+  const cfg: NodeHandleConfig = handles || { inputs: 1, outputs: 1 };
+  const inputs = Math.min(Math.max(cfg.inputs ?? 1, 0), 6);
+  const outputs = Math.min(Math.max(cfg.outputs ?? 1, 0), 6);
+
+  const update = (patch: Partial<NodeHandleConfig>) => onChange({ ...cfg, ...patch });
+
+  const updateInput = (index: number, patch: Partial<{ label: string; color: string }>) => {
+    const inputLabels = [...(cfg.inputLabels || [])];
+    const inputColors = [...(cfg.inputColors || [])];
+    while (inputLabels.length < inputs) inputLabels.push('');
+    while (inputColors.length < inputs) inputColors.push('#64748b');
+    if (patch.label !== undefined) inputLabels[index] = patch.label;
+    if (patch.color !== undefined) inputColors[index] = patch.color;
+    update({ inputLabels, inputColors });
+  };
+
+  const updateOutput = (index: number, patch: Partial<{ label: string; color: string }>) => {
+    const outputLabels = [...(cfg.outputLabels || [])];
+    const outputColors = [...(cfg.outputColors || [])];
+    while (outputLabels.length < outputs) outputLabels.push('');
+    while (outputColors.length < outputs) outputColors.push('#2563eb');
+    if (patch.label !== undefined) outputLabels[index] = patch.label;
+    if (patch.color !== undefined) outputColors[index] = patch.color;
+    update({ outputLabels, outputColors });
+  };
+
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <div style={sectionTitleStyle}>Handles (dynamic)</div>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 10 }}>
+        <label style={{ fontSize: 12 }}>
+          Inputs
+          <input
+            type="number"
+            min={0}
+            max={6}
+            style={{ ...inputStyle, width: 64, marginLeft: 6 }}
+            value={inputs}
+            onChange={(e) => update({ inputs: Number(e.target.value) })}
+          />
+        </label>
+        <label style={{ fontSize: 12 }}>
+          Outputs
+          <input
+            type="number"
+            min={0}
+            max={6}
+            style={{ ...inputStyle, width: 64, marginLeft: 6 }}
+            value={outputs}
+            onChange={(e) => update({ outputs: Number(e.target.value) })}
+          />
+        </label>
+      </div>
+
+      <div style={sectionTitleStyle}>Input labels</div>
+      {Array.from({ length: inputs }, (_, i) => (
+        <div key={`in-${i}`} style={handleRowStyle}>
+          <input
+            aria-label={`Input ${i} label`}
+            style={inputStyle}
+            placeholder={`input-${i} label (e.g. match, hit, path-a)`}
+            value={cfg.inputLabels?.[i] || ''}
+            onChange={(e) => updateInput(i, { label: e.target.value })}
+          />
+          <input
+            aria-label={`Input ${i} color`}
+            type="color"
+            style={colorInputStyle}
+            value={cfg.inputColors?.[i] || '#64748b'}
+            onChange={(e) => updateInput(i, { color: e.target.value })}
+          />
+          <span style={{ fontSize: 11, color: '#94a3b8' }}>in-{i}</span>
+        </div>
+      ))}
+
+      <div style={sectionTitleStyle}>Output labels</div>
+      {Array.from({ length: outputs }, (_, i) => (
+        <div key={`out-${i}`} style={handleRowStyle}>
+          <input
+            aria-label={`Output ${i} label`}
+            style={inputStyle}
+            placeholder={`output-${i} label (e.g. skip, miss, path-b)`}
+            value={cfg.outputLabels?.[i] || ''}
+            onChange={(e) => updateOutput(i, { label: e.target.value })}
+          />
+          <input
+            aria-label={`Output ${i} color`}
+            type="color"
+            style={colorInputStyle}
+            value={cfg.outputColors?.[i] || '#2563eb'}
+            onChange={(e) => updateOutput(i, { color: e.target.value })}
+          />
+          <span style={{ fontSize: 11, color: '#94a3b8' }}>out-{i}</span>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 /**
@@ -233,13 +369,16 @@ export function AiNodeEditor({ node, onUpdate, onDelete, onCancel }: NodeEditorP
 export function SchemaDrivenDemoEditor({ node, onUpdate, onDelete, onCancel }: NodeEditorProps) {
   const schema: ParameterSchema =
     node.data.parametersSchema || node.data.parameters_schema || {};
-  const handles = node.data.uiConfig?.handles;
   const [values, setValues] = useState<Record<string, unknown>>(
     () => ({ ...node.data.parameters })
+  );
+  const [handles, setHandles] = useState<NodeHandleConfig | undefined>(
+    () => ({ ...node.data.uiConfig?.handles })
   );
 
   useEffect(() => {
     setValues({ ...node.data.parameters });
+    setHandles({ ...node.data.uiConfig?.handles });
   }, [node]);
 
   const handleChange = useCallback((field: string, value: unknown) => {
@@ -252,37 +391,27 @@ export function SchemaDrivenDemoEditor({ node, onUpdate, onDelete, onCancel }: N
       data: {
         ...node.data,
         parameters: values,
+        uiConfig: {
+          ...node.data.uiConfig,
+          handles,
+        },
       },
     };
     onUpdate(updated);
-  }, [node, onUpdate, values]);
+  }, [node, onUpdate, values, handles]);
 
   return (
     <div style={{ padding: 12 }}>
       <h3 style={{ margin: '0 0 12px', fontSize: 15 }}>
-        Schema parameters — {node.data.nodeType}
+        Settings — {node.data.nodeType}
       </h3>
-      {handles ? (
-        <div
-          style={{
-            margin: '0 0 12px',
-            padding: '8px 10px',
-            borderRadius: 8,
-            border: '1px solid #e2e8f0',
-            background: '#f8fafc',
-            fontSize: 12,
-            color: '#334155',
-          }}
-        >
-          <strong>Handles:</strong> {handles.inputs ?? 1} input(s) ·{' '}
-          {handles.outputs ?? 1} output(s)
-          {handles.mode === 'condition' ? ' · condition (yes/no)' : ''}
-          {handles.outputColors?.length
-            ? ` · outputs ${handles.outputColors.join(', ')}`
-            : ''}
-        </div>
+      <HandleSettingsFields handles={handles} onChange={setHandles} />
+      {Object.keys(schema.properties || {}).length > 0 ? (
+        <>
+          <div style={sectionTitleStyle}>Parameters</div>
+          <SchemaDrivenEditor schema={schema} values={values} onChange={handleChange} />
+        </>
       ) : null}
-      <SchemaDrivenEditor schema={schema} values={values} onChange={handleChange} />
       <div style={actionsStyle}>
         <button type="button" style={btnDanger} onClick={onDelete}>
           Delete
@@ -327,10 +456,14 @@ const notExitGuideTitle: React.CSSProperties = {
 export function NotExitNodeEditor({ node, onUpdate, onDelete, onCancel }: NodeEditorProps) {
   const [label, setLabel] = useState(() => readParam(node, 'label', node.data.label || ''));
   const [note, setNote] = useState(() => readParam(node, 'note'));
+  const [handles, setHandles] = useState<NodeHandleConfig | undefined>(
+    () => ({ ...node.data.uiConfig?.handles })
+  );
 
   useEffect(() => {
     setLabel(readParam(node, 'label', node.data.label || ''));
     setNote(readParam(node, 'note'));
+    setHandles({ ...node.data.uiConfig?.handles });
   }, [node]);
 
   const handleConfirm = useCallback(() => {
@@ -340,10 +473,11 @@ export function NotExitNodeEditor({ node, onUpdate, onDelete, onCancel }: NodeEd
         ...node.data,
         label: label || node.data.label,
         parameters: { ...node.data.parameters, note },
+        uiConfig: { ...node.data.uiConfig, handles },
       },
     };
     onUpdate(updated);
-  }, [node, onUpdate, label, note]);
+  }, [node, onUpdate, label, note, handles]);
 
   return (
     <div style={{ padding: 12 }}>
@@ -353,22 +487,23 @@ export function NotExitNodeEditor({ node, onUpdate, onDelete, onCancel }: NodeEd
         <p style={notExitGuideTitle}>Guide · not exist</p>
         <p style={{ margin: 0 }}>
           <strong>NOT EXIT</strong> means <strong>not exist</strong> — the negated
-          intersection of two inputs.
+          branch of two inputs.
         </p>
         <ul style={{ margin: '8px 0 0', paddingInlineStart: 18 }}>
-          <li>Flow continues only when the EXIT condition does <em>not</em> exist.</li>
+          <li>Handle labels are <strong>custom</strong> (not always yes/no).</li>
           <li>
-            Two inputs: <span style={{ color: '#16a34a', fontWeight: 700 }}>yes</span> (green)
-            and <span style={{ color: '#dc2626', fontWeight: 700 }}>no</span> (red).
+            Current sample uses <em>exists</em> / <em>not-exist</em> — change them
+            below for your backend.
           </li>
           <li>
-            Backend can route by handle: <code>targetHandle</code> ={' '}
-            <code>input-0</code> (yes) or <code>input-1</code> /{' '}
-            <code>second-input</code> (no).
+            Route by <code>targetHandle</code>: <code>input-0</code>,{' '}
+            <code>input-1</code>, …
           </li>
-          <li>Handle colors are configurable via <code>uiConfig.handles.inputColors</code>.</li>
+          <li>Colors come from <code>uiConfig.handles.inputColors</code>.</li>
         </ul>
       </div>
+
+      <HandleSettingsFields handles={handles} onChange={setHandles} />
 
       <div style={fieldStyle}>
         <label style={labelStyle} htmlFor="ef-demo-notexit-label">
@@ -412,14 +547,15 @@ export function NotExitNodeEditor({ node, onUpdate, onDelete, onCancel }: NodeEd
 
 function hasSchema(nodeType: string): boolean {
   // Custom editors are registered first for actions.email / integrations.ai
-  // and operators.not_exit. This predicate claims remaining schema-bearing types.
+  // and operators.not_exit. This predicate claims remaining schema/handle types.
   return (
     nodeType === 'control.delay' ||
     nodeType === 'filters.age' ||
     nodeType === 'filters.gender' ||
     nodeType === 'actions.sms' ||
     nodeType === 'data.transform' ||
-    nodeType === 'data.router'
+    nodeType === 'data.router' ||
+    nodeType === 'operators.exit'
   );
 }
 

@@ -35,16 +35,33 @@ function cardSchema(key: string) {
 }
 
 /**
- * Sample graph matching the README / docs preview:
- * Start → Age Filter + Gender Filter → NOT EXIT → End
- * (5 nodes, 5 edges, dashed smoothstep).
+ * Sample graph — clean grid, every multi-input handle is connected.
+ * Handle labels are custom (not always yes/no).
+ *
+ * ```
+ *              Start
+ *     /    /    |    \       \
+ *  Age  Gender Delay NOT EXIT Router
+ *  / \   / \           |        |
+ * m s  m s            in0     in0←Gender skip
+ * |  \  |  \          in1     in1←Delay
+ * |   \ |   \                   in2←Start
+ * EXIT  NOT EXIT
+ * hit/miss exists/not-exist
+ *   \      |      /
+ *    Email → End
+ * ```
+ *
+ * NOT EXIT: in-0 exists ← Start · in-1 not-exist ← Age skip
+ * EXIT:     in-0 hit ← Age match · in-1 miss ← Gender match
+ * Router:   in-0 ← Gender skip · in-1 ← Delay · in-2 ← Start
  */
 function buildSampleWorkflow(): Workflow {
   const nodes: EasyFlowNode[] = [
     {
       id: 'sample-start',
       type: 'easyFlowNode',
-      position: { x: 360, y: 40 },
+      position: { x: 480, y: 30 },
       data: {
         label: 'Start',
         label_i18n: { en: 'Start', fa: 'شروع' },
@@ -59,7 +76,7 @@ function buildSampleWorkflow(): Workflow {
     {
       id: 'sample-age',
       type: 'easyFlowNode',
-      position: { x: 120, y: 200 },
+      position: { x: 60, y: 180 },
       data: {
         label: 'Age Filter',
         label_i18n: { en: 'Age Filter', fa: 'فیلتر سن' },
@@ -74,8 +91,8 @@ function buildSampleWorkflow(): Workflow {
           handles: {
             inputs: 1,
             outputs: 2,
-            outputColors: ['#22c55e', '#ef4444'],
-            outputLabels: ['yes', 'no'],
+            outputColors: ['#22c55e', '#f97316'],
+            outputLabels: ['match', 'skip'],
           },
         },
         parametersSchema: cardSchema('filters.age'),
@@ -85,7 +102,7 @@ function buildSampleWorkflow(): Workflow {
     {
       id: 'sample-gender',
       type: 'easyFlowNode',
-      position: { x: 520, y: 200 },
+      position: { x: 300, y: 180 },
       data: {
         label: 'Gender Filter',
         label_i18n: { en: 'Gender Filter', fa: 'فیلتر جنسیت' },
@@ -100,8 +117,8 @@ function buildSampleWorkflow(): Workflow {
           handles: {
             inputs: 1,
             outputs: 2,
-            outputColors: ['#22c55e', '#ef4444'],
-            outputLabels: ['yes', 'no'],
+            outputColors: ['#22c55e', '#f97316'],
+            outputLabels: ['match', 'skip'],
           },
         },
         parametersSchema: cardSchema('filters.gender'),
@@ -109,9 +126,56 @@ function buildSampleWorkflow(): Workflow {
       },
     },
     {
+      id: 'sample-delay',
+      type: 'easyFlowNode',
+      position: { x: 560, y: 180 },
+      data: {
+        label: 'Delay',
+        label_i18n: { en: 'Delay', fa: 'تأخیر' },
+        nodeType: 'control.delay',
+        icon: '⏳',
+        cardKey: 'control.delay',
+        category: 'control',
+        uiConfig: {
+          shape: 'rectangle',
+          color: '#64748b',
+          size: 'medium',
+          handles: { inputs: 1, outputs: 1 },
+        },
+        parametersSchema: cardSchema('control.delay'),
+        parameters: { duration: 5, unit: 'seconds' },
+      },
+    },
+    {
+      id: 'sample-exit',
+      type: 'easyFlowNode',
+      position: { x: 40, y: 380 },
+      data: {
+        label: 'EXIT',
+        label_i18n: { en: 'EXIT', fa: 'خروج' },
+        nodeType: 'operators.exit',
+        icon: '⚡',
+        cardKey: 'operators.exit',
+        category: 'operators',
+        uiConfig: {
+          shape: 'downtriangle',
+          color: '#eab308',
+          size: 'small',
+          handles: {
+            mode: 'condition',
+            inputs: 2,
+            outputs: 1,
+            inputColors: ['#22c55e', '#f97316'],
+            inputLabels: ['hit', 'miss'],
+          },
+        },
+        parameters: {},
+      },
+    },
+    {
       id: 'sample-not-exit',
       type: 'easyFlowNode',
-      position: { x: 320, y: 360 },
+      position: { x: 260, y: 380 },
       data: {
         label: 'NOT EXIT',
         label_i18n: { en: 'NOT EXIT', fa: 'عدم خروج' },
@@ -127,17 +191,68 @@ function buildSampleWorkflow(): Workflow {
             mode: 'condition',
             inputs: 2,
             outputs: 1,
-            inputColors: ['#22c55e', '#ef4444'],
-            inputLabels: ['yes', 'no'],
+            inputColors: ['#22c55e', '#f97316'],
+            inputLabels: ['exists', 'not-exist'],
           },
         },
         parameters: {},
       },
     },
     {
+      id: 'sample-router',
+      type: 'easyFlowNode',
+      position: { x: 480, y: 380 },
+      data: {
+        label: 'Router',
+        label_i18n: { en: 'Router', fa: 'مسیریاب' },
+        nodeType: 'data.router',
+        icon: '🔀',
+        cardKey: 'data.router',
+        category: 'data',
+        uiConfig: {
+          shape: 'rectangle',
+          color: '#0ea5e9',
+          size: 'medium',
+          handles: {
+            inputs: 3,
+            outputs: 2,
+            inputColors: ['#64748b', '#64748b', '#64748b'],
+            outputColors: ['#22c55e', '#f97316'],
+            outputLabels: ['path-a', 'path-b'],
+          },
+        },
+        parameters: {},
+      },
+    },
+    {
+      id: 'sample-email',
+      type: 'easyFlowNode',
+      position: { x: 340, y: 560 },
+      data: {
+        label: 'Send Email',
+        label_i18n: { en: 'Send Email', fa: 'ارسال ایمیل' },
+        nodeType: 'actions.email',
+        icon: '📧',
+        cardKey: 'actions.email',
+        category: 'actions',
+        uiConfig: {
+          shape: 'rectangle',
+          color: '#f59e0b',
+          size: 'medium',
+          handles: { inputs: 1, outputs: 1 },
+        },
+        parametersSchema: cardSchema('actions.email'),
+        parameters: {
+          to: 'team@example.com',
+          subject: 'Workflow update',
+          body: 'A node in your flow was updated.',
+        },
+      },
+    },
+    {
       id: 'sample-end',
       type: 'easyFlowNode',
-      position: { x: 330, y: 520 },
+      position: { x: 400, y: 740 },
       data: {
         label: 'End',
         label_i18n: { en: 'End', fa: 'پایان' },
@@ -151,57 +266,59 @@ function buildSampleWorkflow(): Workflow {
     },
   ];
 
+  const edge = (
+    id: string,
+    source: string,
+    target: string,
+    sourceHandle: string,
+    targetHandle: string,
+    stroke?: string
+  ): EasyFlowEdge => ({
+    id,
+    source,
+    target,
+    sourceHandle,
+    targetHandle,
+    type: 'smoothstep',
+    animated: true,
+    ...(stroke ? { style: { stroke } } : {}),
+  });
+
   const edges: EasyFlowEdge[] = [
-    {
-      id: 'sample-e1',
-      source: 'sample-start',
-      target: 'sample-age',
-      sourceHandle: 'output-0',
-      targetHandle: 'input-0',
-      type: 'smoothstep',
-      animated: true,
-    },
-    {
-      id: 'sample-e2',
-      source: 'sample-start',
-      target: 'sample-gender',
-      sourceHandle: 'output-0',
-      targetHandle: 'input-0',
-      type: 'smoothstep',
-      animated: true,
-    },
-    {
-      // Age Filter “yes” (green output-0) → NOT EXIT primary input
-      id: 'sample-e3',
-      source: 'sample-age',
-      target: 'sample-not-exit',
-      sourceHandle: 'output-0',
-      targetHandle: 'input-0',
-      type: 'smoothstep',
-      animated: true,
-      style: { stroke: '#22c55e' },
-    },
-    {
-      // Gender Filter “no” (red output-1) → NOT EXIT second input
-      id: 'sample-e4',
-      source: 'sample-gender',
-      target: 'sample-not-exit',
-      sourceHandle: 'output-1',
-      targetHandle: 'input-1',
-      type: 'smoothstep',
-      animated: true,
-      style: { stroke: '#ef4444' },
-    },
-    {
-      id: 'sample-e5',
-      source: 'sample-not-exit',
-      target: 'sample-end',
-      sourceHandle: 'output-0',
-      targetHandle: 'input-0',
-      type: 'smoothstep',
-      animated: true,
-    },
+    // ── Start fan-out (every downstream input below is filled) ──
+    edge('e-start-age', 'sample-start', 'sample-age', 'output-0', 'input-0'),
+    edge('e-start-gender', 'sample-start', 'sample-gender', 'output-0', 'input-0'),
+    edge('e-start-delay', 'sample-start', 'sample-delay', 'output-0', 'input-0'),
+    // NOT EXIT input-0 (exists) ← Start
+    edge('e-start-notexit', 'sample-start', 'sample-not-exit', 'output-0', 'input-0', '#22c55e'),
+    // Router input-2 (third input, middle handle) ← Start
+    edge('e-start-router', 'sample-start', 'sample-router', 'output-0', 'input-2'),
+
+    // ── Age Filter: match → EXIT hit; skip → NOT EXIT not-exist ──
+    edge('e-age-exit', 'sample-age', 'sample-exit', 'output-0', 'input-0', '#22c55e'),
+    edge('e-age-notexit', 'sample-age', 'sample-not-exit', 'output-1', 'input-1', '#f97316'),
+
+    // ── Gender Filter: match → EXIT miss; skip → Router input-0 ──
+    edge('e-gender-exit', 'sample-gender', 'sample-exit', 'output-0', 'input-1', '#22c55e'),
+    edge('e-gender-router', 'sample-gender', 'sample-router', 'output-1', 'input-0', '#f97316'),
+
+    // ── Delay → Router input-1 (middle-left of the three inputs) ──
+    edge('e-delay-router', 'sample-delay', 'sample-router', 'output-0', 'input-1'),
+
+    // ── Router outputs → Email ──
+    edge('e-router-a', 'sample-router', 'sample-email', 'output-0', 'input-0', '#22c55e'),
+    edge('e-router-b', 'sample-router', 'sample-email', 'output-1', 'input-0', '#f97316'),
+
+    // ── Operator + action terminals ──
+    edge('e-exit-email', 'sample-exit', 'sample-email', 'output-0', 'input-0'),
+    edge('e-notexit-end', 'sample-not-exit', 'sample-end', 'output-0', 'input-0'),
+    edge('e-email-end', 'sample-email', 'sample-end', 'output-0', 'input-0'),
   ];
+
+  // Every multi-input handle must appear at least once:
+  // NOT EXIT: input-0 (exists) ← Start, input-1 (not-exist) ← Age skip
+  // EXIT:     input-0 (hit) ← Age match, input-1 (miss) ← Gender match
+  // Router:   input-0 ← Gender skip, input-1 ← Delay, input-2 ← Start
 
   return {
     id: 'sample',

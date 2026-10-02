@@ -165,8 +165,9 @@ describe('findHandle / getHandleColor', () => {
     })
   );
 
-  it('resolves by id and legacy second-input', () => {
+  it('resolves by id and maps legacy second-input to input-1', () => {
     expect(findHandle(handles, 'input-0')?.color).toBe(CONDITION_YES_COLOR);
+    expect(findHandle(handles, 'input-1')?.color).toBe(CONDITION_NO_COLOR);
     expect(findHandle(handles, 'second-input')?.id).toBe('input-1');
     expect(findHandle(handles, 'missing')).toBeNull();
   });

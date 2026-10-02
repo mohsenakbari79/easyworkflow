@@ -260,10 +260,9 @@
   box-shadow:
     0 0 0 1px var(--ef-border-strong),
     var(--ef-shadow-xs);
-  transition: transform var(--ef-transition-fast);
-}
-.handle:hover {
-  transform: scale(1.15);
+  /* Stable cursor — avoid hover scale so the pointer does not flicker. */
+  cursor: crosshair !important;
+  pointer-events: all !important;
 }
 .handleLabeled {
   width: 16px !important;

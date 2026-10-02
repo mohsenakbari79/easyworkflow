@@ -118,23 +118,21 @@ function FlowNodeComponent({ data, selected }: NodeProps) {
         </svg>
       )}
 
-      {inputs.map((handle) => {
-        // Legacy alias: second input also exposes `second-input` id.
-        const id = handle.id === 'input-1' ? 'second-input' : handle.id;
-        return (
-          <Handle
-            key={handle.id}
-            id={id}
-            type="target"
-            position={positionToRF(handle.position)}
-            className={`${styles.handle} ${handle.label ? styles.handleLabeled : ''}`}
-            style={handleStyle(handle, isDownTriangle)}
-            data-handle-id={handle.id}
-            data-handle-label={handle.label || ''}
-            title={handle.label ? `${handle.id} · ${handle.label}` : handle.id}
-          />
-        );
-      })}
+      {inputs.map((handle) => (
+        // DOM id must match edge targetHandle (`input-0`, `input-1`, …).
+        // Legacy `second-input` is normalized by findHandle / WorkflowEditor.
+        <Handle
+          key={handle.id}
+          id={handle.id}
+          type="target"
+          position={positionToRF(handle.position)}
+          className={`${styles.handle} ${handle.label ? styles.handleLabeled : ''}`}
+          style={handleStyle(handle, isDownTriangle)}
+          data-handle-id={handle.id}
+          data-handle-label={handle.label || ''}
+          title={handle.label ? `${handle.id} · ${handle.label}` : handle.id}
+        />
+      ))}
 
       <div className={styles.header} style={{ backgroundColor: nodeColor }}>
         {icon && <span className={styles.icon}>{icon}</span>}
@@ -161,7 +159,7 @@ function FlowNodeComponent({ data, selected }: NodeProps) {
         />
       ))}
 
-      {/* Condition labels (yes/no) beside colored handles */}
+      {/* Custom handle labels (match/skip, hit/miss, path-a, … — not fixed yes/no) */}
       {inputs
         .filter((h) => h.label)
         .map((h) => (
