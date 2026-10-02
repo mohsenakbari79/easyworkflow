@@ -2,8 +2,11 @@
 
 > A fully configurable, i18n-ready visual workflow editor for React — drag-and-drop nodes, custom editors, adapter-based backend, MIT licensed.
 
-[![npm version](https://img.shields.io/npm/v/@malevin/easyworkflow.svg)](https://www.npmjs.com/package/@malevin/easyworkflow)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/mohsenakbari79/easyworkflow/actions/workflows/ci.yml/badge.svg)](https://github.com/mohsenakbari79/easyworkflow/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/@malevin/easyworkflow)](https://www.npmjs.com/package/@malevin/easyworkflow)
+[![npm downloads](https://img.shields.io/npm/dm/@malevin/easyworkflow)](https://www.npmjs.com/package/@malevin/easyworkflow)
+[![License](https://img.shields.io/npm/l/@malevin/easyworkflow)](https://github.com/mohsenakbari79/easyworkflow/blob/main/LICENSE)
+[![Node version](https://img.shields.io/node/v/@malevin/easyworkflow)](https://www.npmjs.com/package/@malevin/easyworkflow)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 
 ## Demo
