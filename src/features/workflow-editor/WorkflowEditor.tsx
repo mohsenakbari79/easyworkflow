@@ -498,21 +498,37 @@ function WorkflowEditorInner({
   }, [handleCopyNode, handlePasteNode, handleDuplicateNode, handleDeleteNode, selectedNodeId]);
 
   const handleSave = useCallback(async () => {
-    if (!onSave) return;
+    const payload = {
+      id: workflowId,
+      name: workflowName || t('workflow.untitled', 'Untitled Workflow'),
+      type: workflowType,
+      nodes: localizedNodes as EasyFlowNode[],
+      edges: edges as EasyFlowEdge[],
+    };
     setIsSaving(true);
     try {
-      onSave({
-        id: workflowId,
-        name: workflowName || t('workflow.untitled', 'Untitled Workflow'),
-        type: workflowType,
-        nodes: localizedNodes as EasyFlowNode[],
-        edges: edges as EasyFlowEdge[],
-      });
+      // Persist through the adapter when available, then notify the host.
+      if (adapter?.saveWorkflow) {
+        await adapter.saveWorkflow(payload);
+      }
+      onSave?.(payload);
       showToast?.('success', t('toasts.saveSuccess', 'Workflow saved'));
+    } catch {
+      showToast?.('error', t('toasts.saveError', 'Failed to save workflow'));
     } finally {
       setIsSaving(false);
     }
-  }, [onSave, workflowId, workflowName, workflowType, localizedNodes, edges, showToast, t]);
+  }, [
+    adapter,
+    onSave,
+    workflowId,
+    workflowName,
+    workflowType,
+    localizedNodes,
+    edges,
+    showToast,
+    t,
+  ]);
 
   const handleSync = useCallback(async () => {
     if (!adapter?.syncCards) return;

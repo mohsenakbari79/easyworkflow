@@ -10,6 +10,10 @@ storybook-static/
 coverage/
 *.tsbuildinfo
 
+# Test artifacts
+test-results/
+playwright-report/
+
 # Environment
 .env
 .env.local
