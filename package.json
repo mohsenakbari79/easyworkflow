@@ -1,6 +1,7 @@
 {
   "name": "@malevin/easyworkflow",
   "version": "0.1.3",
+  "description": "Build a workflow editor in 15 minutes - not 5 days of building from scratch. A customizable React component for node-based UIs with i18n/RTL support.",
   "publishConfig": {
     "access": "public"
   },
@@ -79,23 +80,28 @@
     "e2e:serve": "vite --config e2e/vite.config.ts"
   },
   "keywords": [
-    "workflow",
-    "flow",
-    "editor",
-    "visual",
     "react",
-    "reactflow",
-    "node",
-    "graph",
+    "workflow",
+    "workflow-editor",
+    "flow-builder",
+    "react-flow",
+    "node-based",
+    "diagram",
+    "low-code",
+    "no-code",
+    "automation",
+    "visual-editor",
     "drag-and-drop",
-    "pipeline"
+    "typescript",
+    "i18n",
+    "rtl"
   ],
   "author": "mohsen akbari https://mohsenakbari79.github.io/",
   "license": "MIT",
-  "homepage": "https://github.com/mohsenakbari79/easyworkflow#readme",
+  "homepage": "https://mohsenakbari79.github.io/easyworkflow/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mohsenakbari79/easyworkflow.git"
+    "url": "https://github.com/mohsenakbari79/easyworkflow.git"
   },
   "bugs": {
     "url": "https://github.com/mohsenakbari79/easyworkflow/issues"
