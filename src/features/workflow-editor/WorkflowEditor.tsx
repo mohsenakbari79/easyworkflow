@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState, Component } from 'rea
 import type { ErrorInfo, ReactNode } from 'react';
 import type { Node, Edge, Connection, NodeChange, EdgeChange } from '@xyflow/react';
 import { ReactFlowProvider, applyNodeChanges, applyEdgeChanges, addEdge } from '@xyflow/react';
-import type { EasyFlowNode, EasyFlowEdge } from '../../types/node';
+import type { EasyFlowNode, EasyFlowEdge, EasyFlowNodeData } from '../../types/node';
 import type { CardDefinition } from '../../types/card';
 import type { APIAdapter } from '../../types/api';
 import type { NodeEditorComponent } from '../../types/editor';
@@ -11,6 +11,7 @@ import { useWorkflow } from '../../hooks/useWorkflow';
 import { useTranslation } from '../../hooks/useTranslation';
 import { generateNodeId } from '../../utils/nodeId';
 import { pickLocalized } from '../../utils/localization';
+import { getHandleColor, resolveNodeHandles } from '../../utils/handles';
 import { Canvas } from '../../components/Canvas';
 import { NodeEditorPanel, type PanelMode } from '../../components/NodeEditorPanel';
 import styles from './WorkflowEditor.module.css';
@@ -285,7 +286,8 @@ function WorkflowEditorInner({
     incoming.forEach((edge) => {
       const srcNode = localizedNodes.find((n) => n.id === edge.source);
       const label = ((srcNode?.data as Record<string, unknown>)?.label as string) || edge.source;
-      if (edge.targetHandle === 'second-input') {
+      const handleId = edge.targetHandle;
+      if (handleId === 'second-input' || handleId === 'input-1' || handleId === 'input-2') {
         parent2 = label;
       } else if (!parent1) {
         parent1 = label;
@@ -433,19 +435,38 @@ function WorkflowEditorInner({
     showToast?.('info', t('toasts.edgeDeleted', 'Edge deleted'));
   }, [selectedEdgeId, showToast, t]);
 
-  const onConnect = useCallback((connection: Connection) => {
-    setEdges((eds) =>
-      addEdge(
-        {
-          ...connection,
-          type: 'smoothstep',
-          animated: true,
-          style: { stroke: 'var(--ef-primary, #2563eb)' },
-        },
-        eds
-      )
-    );
-  }, []);
+  const onConnect = useCallback(
+    (connection: Connection) => {
+      // Paint the new edge with the target handle color when available
+      // (condition yes/no routing is visible on the canvas).
+      let stroke = 'var(--ef-primary, #2563eb)';
+      if (connection.target) {
+        const targetNode = localizedNodes.find((n) => n.id === connection.target);
+        if (targetNode) {
+          const handleColor = getHandleColor(
+            resolveNodeHandles(targetNode.data as EasyFlowNodeData),
+            connection.targetHandle
+          );
+          if (handleColor) stroke = handleColor;
+        }
+      }
+      setEdges((eds) =>
+        addEdge(
+          {
+            ...connection,
+            // Normalize legacy handle id.
+            targetHandle:
+              connection.targetHandle === 'second-input' ? 'input-1' : connection.targetHandle,
+            type: 'smoothstep',
+            animated: true,
+            style: { stroke },
+          },
+          eds
+        )
+      );
+    },
+    [localizedNodes]
+  );
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     setSelectedNodeId(node.id);

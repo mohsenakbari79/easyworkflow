@@ -2,15 +2,16 @@
  * Default EasyFlow node renderer.
  *
  * Renders colored headers, shape containers (rectangle, ellipse, diamond,
- * downtriangle), status glow, and React Flow handles for binary operators.
- * Render errors are surfaced by the parent `WorkflowEditor` error boundary.
+ * downtriangle), status glow, and **dynamic** React Flow handles driven by
+ * `uiConfig.handles` (counts, condition mode, per-handle colors/labels).
  */
 
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 import type { NodeProps } from '@xyflow/react';
 import styles from './FlowNode.module.css';
-import type { EasyFlowNodeData, NodeStatus } from '../../types/node';
+import type { EasyFlowNodeData, NodeStatus, ResolvedNodeHandle } from '../../types/node';
+import { resolveNodeHandles } from '../../utils/handles';
 
 /** Status → glow color map used by {@link FlowNode}. */
 const statusColors: Record<string, string> = {
@@ -31,11 +32,43 @@ function getStatusColor(status?: NodeStatus): string {
   return statusColors[status || 'notstarted'] || '#6c757d';
 }
 
+function positionToRF(position: ResolvedNodeHandle['position']) {
+  switch (position) {
+    case 'bottom':
+      return Position.Bottom;
+    case 'left':
+      return Position.Left;
+    case 'right':
+      return Position.Right;
+    case 'top':
+    default:
+      return Position.Top;
+  }
+}
+
+function handleStyle(handle: ResolvedNodeHandle, isDownTriangle: boolean): React.CSSProperties {
+  const base: React.CSSProperties = {
+    background: handle.color,
+    borderColor: 'var(--ef-card-bg, #fff)',
+  };
+  if (handle.position === 'top') {
+    if (isDownTriangle || handle.percent !== 50) {
+      base.left = `${handle.percent}%`;
+      base.top = '-6px';
+    }
+  }
+  if (handle.position === 'bottom' && handle.percent !== 50) {
+    base.left = `${handle.percent}%`;
+  }
+  return base;
+}
+
 /**
  * Default node visual component (memoized).
  *
- * Receives standard `@xyflow/react` `NodeProps`. Node data is cast to
- * `Partial<EasyFlowNodeData>` so missing fields fall back to defaults.
+ * Handles are resolved from `uiConfig.handles` via {@link resolveNodeHandles}.
+ * Condition mode draws two colored inputs (yes/no) on inverted triangles or
+ * rectangles so backends can branch by handle id/color.
  */
 function FlowNodeComponent({ data, selected }: NodeProps) {
   const nodeData = (data || {}) as Partial<EasyFlowNodeData>;
@@ -47,10 +80,10 @@ function FlowNodeComponent({ data, selected }: NodeProps) {
   const statusColor = getStatusColor(status);
   const hasStatus = status !== undefined && status !== 'notstarted';
 
-  const isExit = nodeType.startsWith('operator.exit');
-  const isNotExit = nodeType.startsWith('operator.not_exit');
-  const isBinaryOperator = isExit || isNotExit;
   const isDownTriangle = nodeShape === 'downtriangle';
+  const handles = resolveNodeHandles(nodeData);
+  const inputs = handles.filter((h) => h.type === 'target');
+  const outputs = handles.filter((h) => h.type === 'source');
 
   const shapeKey = `shape${nodeShape.charAt(0).toUpperCase() + nodeShape.slice(1)}`;
   const sizeKey = `size${nodeSize.charAt(0).toUpperCase() + nodeSize.slice(1)}`;
@@ -60,6 +93,9 @@ function FlowNodeComponent({ data, selected }: NodeProps) {
   return (
     <div
       className={`${styles.node} ${shapeClass} ${sizeClass} ${selected ? styles.selected : ''}`}
+      data-node-type={nodeType}
+      data-handle-inputs={inputs.length}
+      data-handle-outputs={outputs.length}
       style={
         {
           borderColor: nodeColor,
@@ -82,41 +118,23 @@ function FlowNodeComponent({ data, selected }: NodeProps) {
         </svg>
       )}
 
-      {isBinaryOperator && isDownTriangle ? (
-        <>
+      {inputs.map((handle) => {
+        // Legacy alias: second input also exposes `second-input` id.
+        const id = handle.id === 'input-1' ? 'second-input' : handle.id;
+        return (
           <Handle
+            key={handle.id}
+            id={id}
             type="target"
-            position={Position.Top}
-            className={`${styles.handle} ${styles.handleBinary} ${styles.handle1} ${styles.handleCornerLeft}`}
-            style={{ background: nodeColor, left: '22%', top: '-6px' }}
+            position={positionToRF(handle.position)}
+            className={`${styles.handle} ${handle.label ? styles.handleLabeled : ''}`}
+            style={handleStyle(handle, isDownTriangle)}
+            data-handle-id={handle.id}
+            data-handle-label={handle.label || ''}
+            title={handle.label ? `${handle.id} · ${handle.label}` : handle.id}
           />
-          <Handle
-            type="target"
-            position={Position.Top}
-            className={`${styles.handle} ${styles.handleBinary} ${styles.handle2} ${styles.handleCornerRight}`}
-            style={{ background: nodeColor, left: '78%', top: '-6px' }}
-            id="second-input"
-          />
-        </>
-      ) : (
-        <>
-          <Handle
-            type="target"
-            position={Position.Top}
-            className={`${styles.handle} ${isBinaryOperator ? `${styles.handleBinary} ${styles.handle1}` : ''}`}
-            style={{ background: nodeColor }}
-          />
-          {isBinaryOperator && (
-            <Handle
-              type="target"
-              position={Position.Left}
-              className={`${styles.handle} ${styles.handleBinary} ${styles.handle2}`}
-              style={{ background: nodeColor, top: '70%' }}
-              id="second-input"
-            />
-          )}
-        </>
-      )}
+        );
+      })}
 
       <div className={styles.header} style={{ backgroundColor: nodeColor }}>
         {icon && <span className={styles.icon}>{icon}</span>}
@@ -129,12 +147,55 @@ function FlowNodeComponent({ data, selected }: NodeProps) {
         </div>
       )}
 
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        className={styles.handle}
-        style={{ background: nodeColor }}
-      />
+      {outputs.map((handle) => (
+        <Handle
+          key={handle.id}
+          id={handle.id}
+          type="source"
+          position={positionToRF(handle.position)}
+          className={`${styles.handle} ${handle.label ? styles.handleLabeled : ''}`}
+          style={handleStyle(handle, isDownTriangle)}
+          data-handle-id={handle.id}
+          data-handle-label={handle.label || ''}
+          title={handle.label ? `${handle.id} · ${handle.label}` : handle.id}
+        />
+      ))}
+
+      {/* Condition labels (yes/no) beside colored handles */}
+      {inputs
+        .filter((h) => h.label)
+        .map((h) => (
+          <span
+            key={`${h.id}-label`}
+            className={styles.handleLabel}
+            style={{
+              left: h.percent <= 50 ? `${Math.max(h.percent - 8, 0)}%` : undefined,
+              right: h.percent > 50 ? `${Math.max(100 - h.percent - 8, 0)}%` : undefined,
+              top: isDownTriangle ? -22 : -18,
+              color: h.color,
+            }}
+            aria-hidden="true"
+          >
+            {h.label}
+          </span>
+        ))}
+      {outputs
+        .filter((h) => h.label)
+        .map((h) => (
+          <span
+            key={`${h.id}-label`}
+            className={styles.handleLabel}
+            style={{
+              left: `${h.percent}%`,
+              transform: 'translateX(-50%)',
+              bottom: -18,
+              color: h.color,
+            }}
+            aria-hidden="true"
+          >
+            {h.label}
+          </span>
+        ))}
     </div>
   );
 }

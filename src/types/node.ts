@@ -14,7 +14,57 @@ export type NodeSize = 'small' | 'medium' | 'large';
 export type NodeStatus = 'notstarted' | 'running' | 'completed' | 'failed' | 'waiting' | 'queued';
 
 /**
- * Visual configuration for a node (shape, size, color, output schema).
+ * Handle layout mode for a node.
+ *
+ * - `default` — 1 input (top) + 1 output (bottom), or counts from `handles`
+ * - `single` — force a single input/output pair
+ * - `condition` — two labeled inputs (e.g. yes/no) for branching operators
+ */
+export type HandleMode = 'default' | 'single' | 'condition';
+
+/**
+ * Dynamic input/output handle configuration.
+ *
+ * Counts, colors, and labels are fully configurable so backends can route
+ * flows by handle id/color (e.g. green = condition true / “yes”).
+ */
+export interface NodeHandleConfig {
+  /** Number of input (target) handles. Default: `1`. */
+  inputs?: number;
+  /** Number of output (source) handles. Default: `1`. */
+  outputs?: number;
+  /** Layout mode. `condition` implies two labeled inputs when `inputs` is unset. */
+  mode?: HandleMode;
+  /** Per-input colors (index-aligned with handle ids `input-0`, `input-1`, …). */
+  inputColors?: string[];
+  /** Per-output colors (index-aligned with `output-0`, `output-1`, …). */
+  outputColors?: string[];
+  /** Per-input labels (e.g. `['yes', 'no']` in condition mode). */
+  inputLabels?: string[];
+  /** Per-output labels (e.g. `['yes', 'no']` for branching outputs). */
+  outputLabels?: string[];
+}
+
+/**
+ * Resolved handle ready to render (used by {@link FlowNode} and tests).
+ */
+export interface ResolvedNodeHandle {
+  /** Stable handle id stored on edges (`sourceHandle` / `targetHandle`). */
+  id: string;
+  /** React Flow handle type. */
+  type: 'source' | 'target';
+  /** CSS position keyword (top/bottom/left/right). */
+  position: 'top' | 'bottom' | 'left' | 'right';
+  /** 0–100 percentage along the edge for multi-handle layout. */
+  percent: number;
+  /** Handle fill color (backend/configurable). */
+  color: string;
+  /** Optional human label (yes/no, …). */
+  label?: string;
+}
+
+/**
+ * Visual configuration for a node (shape, size, color, handles, output schema).
  */
 export interface UIConfig {
   /** Visual shape. Defaults to `rectangle`. */
@@ -25,6 +75,8 @@ export interface UIConfig {
   color?: string;
   /** Optional icon (emoji or text) shown in the node header. */
   icon?: string;
+  /** Dynamic input/output handle configuration. */
+  handles?: NodeHandleConfig;
   /** Optional JSON-schema-like output definition used for variable suggestions. */
   output_schema?: Record<string, unknown>;
   /** Additional custom keys are preserved and passed through. */

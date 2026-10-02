@@ -126,14 +126,25 @@ export const demoCards: CardDefinition[] = [
     node_type: 'operators.exit',
     display_name: 'EXIT',
     display_name_i18n: { en: 'EXIT', fa: 'خروج' },
-    description: 'Intersection of two sets',
+    description: 'Condition · yes/no (green/red inputs)',
     description_i18n: {
-      en: 'Intersection of two sets',
-      fa: 'تقاطع دو مجموعه',
+      en: 'Condition branch — yes (green) / no (red)',
+      fa: 'شرط — بله (سبز) / خیر (قرمز)',
     },
     icon: '⚡',
     category: 'operators',
-    ui_config: { shape: 'downtriangle', color: '#eab308', size: 'small' },
+    ui_config: {
+      shape: 'downtriangle',
+      color: '#eab308',
+      size: 'small',
+      handles: {
+        mode: 'condition',
+        inputs: 2,
+        outputs: 1,
+        inputColors: ['#22c55e', '#ef4444'],
+        inputLabels: ['yes', 'no'],
+      },
+    },
   },
   {
     id: 7,
@@ -141,14 +152,53 @@ export const demoCards: CardDefinition[] = [
     node_type: 'operators.not_exit',
     display_name: 'NOT EXIT',
     display_name_i18n: { en: 'NOT EXIT', fa: 'عدم خروج' },
-    description: 'Negated intersection',
+    description: 'Negated condition · not exist guide',
     description_i18n: {
-      en: 'Negated intersection',
-      fa: 'تقاطع منفی',
+      en: 'Negated condition (not exist) with yes/no inputs',
+      fa: 'شرط منفی (not exist) با ورودی‌های بله/خیر',
     },
     icon: '🚫',
     category: 'operators',
-    ui_config: { shape: 'downtriangle', color: '#ef4444', size: 'small' },
+    ui_config: {
+      shape: 'downtriangle',
+      color: '#ef4444',
+      size: 'small',
+      handles: {
+        mode: 'condition',
+        inputs: 2,
+        outputs: 1,
+        inputColors: ['#22c55e', '#ef4444'],
+        inputLabels: ['yes', 'no'],
+      },
+    },
+  },
+
+  // —— Dynamic multi-handle router ——
+  {
+    id: 9,
+    card_key: 'data.router',
+    node_type: 'data.router',
+    display_name: 'Router',
+    display_name_i18n: { en: 'Router', fa: 'مسیریاب' },
+    description: '3 inputs · 2 outputs (yes/no colors)',
+    description_i18n: {
+      en: 'Route by handle — 3 inputs, 2 colored outputs',
+      fa: 'مسیریابی بر اساس هندل — ۳ ورودی، ۲ خروجی رنگی',
+    },
+    icon: '🔀',
+    category: 'data',
+    ui_config: {
+      shape: 'rectangle',
+      color: '#0ea5e9',
+      size: 'medium',
+      handles: {
+        inputs: 3,
+        outputs: 2,
+        inputColors: ['#64748b', '#64748b', '#64748b'],
+        outputColors: ['#22c55e', '#ef4444'],
+        outputLabels: ['yes', 'no'],
+      },
+    },
   },
 
   // —— Actions (schema + custom editor showcase) ——
@@ -165,7 +215,12 @@ export const demoCards: CardDefinition[] = [
     },
     icon: '📧',
     category: 'actions',
-    ui_config: { shape: 'rectangle', color: '#f59e0b', size: 'medium' },
+    ui_config: {
+      shape: 'rectangle',
+      color: '#f59e0b',
+      size: 'medium',
+      handles: { inputs: 1, outputs: 1 },
+    },
     parameters_schema: {
       type: 'object',
       title: 'Email settings',
@@ -180,4 +235,4 @@ export const demoCards: CardDefinition[] = [
 ];
 
 /** Category keys used by the palette tree (docs preview order). */
-export const demoCategories = ['control', 'filters', 'operators', 'actions'] as const;
+export const demoCategories = ['control', 'filters', 'operators', 'data', 'actions'] as const;

@@ -233,6 +233,7 @@ export function AiNodeEditor({ node, onUpdate, onDelete, onCancel }: NodeEditorP
 export function SchemaDrivenDemoEditor({ node, onUpdate, onDelete, onCancel }: NodeEditorProps) {
   const schema: ParameterSchema =
     node.data.parametersSchema || node.data.parameters_schema || {};
+  const handles = node.data.uiConfig?.handles;
   const [values, setValues] = useState<Record<string, unknown>>(
     () => ({ ...node.data.parameters })
   );
@@ -261,6 +262,26 @@ export function SchemaDrivenDemoEditor({ node, onUpdate, onDelete, onCancel }: N
       <h3 style={{ margin: '0 0 12px', fontSize: 15 }}>
         Schema parameters — {node.data.nodeType}
       </h3>
+      {handles ? (
+        <div
+          style={{
+            margin: '0 0 12px',
+            padding: '8px 10px',
+            borderRadius: 8,
+            border: '1px solid #e2e8f0',
+            background: '#f8fafc',
+            fontSize: 12,
+            color: '#334155',
+          }}
+        >
+          <strong>Handles:</strong> {handles.inputs ?? 1} input(s) ·{' '}
+          {handles.outputs ?? 1} output(s)
+          {handles.mode === 'condition' ? ' · condition (yes/no)' : ''}
+          {handles.outputColors?.length
+            ? ` · outputs ${handles.outputColors.join(', ')}`
+            : ''}
+        </div>
+      ) : null}
       <SchemaDrivenEditor schema={schema} values={values} onChange={handleChange} />
       <div style={actionsStyle}>
         <button type="button" style={btnDanger} onClick={onDelete}>
@@ -336,8 +357,16 @@ export function NotExitNodeEditor({ node, onUpdate, onDelete, onCancel }: NodeEd
         </p>
         <ul style={{ margin: '8px 0 0', paddingInlineStart: 18 }}>
           <li>Flow continues only when the EXIT condition does <em>not</em> exist.</li>
-          <li>Use it to skip a branch when a match is missing.</li>
-          <li>Two inputs (primary + second) are combined with a logical NOT.</li>
+          <li>
+            Two inputs: <span style={{ color: '#16a34a', fontWeight: 700 }}>yes</span> (green)
+            and <span style={{ color: '#dc2626', fontWeight: 700 }}>no</span> (red).
+          </li>
+          <li>
+            Backend can route by handle: <code>targetHandle</code> ={' '}
+            <code>input-0</code> (yes) or <code>input-1</code> /{' '}
+            <code>second-input</code> (no).
+          </li>
+          <li>Handle colors are configurable via <code>uiConfig.handles.inputColors</code>.</li>
         </ul>
       </div>
 
@@ -389,7 +418,8 @@ function hasSchema(nodeType: string): boolean {
     nodeType === 'filters.age' ||
     nodeType === 'filters.gender' ||
     nodeType === 'actions.sms' ||
-    nodeType === 'data.transform'
+    nodeType === 'data.transform' ||
+    nodeType === 'data.router'
   );
 }
 

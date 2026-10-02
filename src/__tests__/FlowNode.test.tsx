@@ -104,4 +104,65 @@ describe('FlowNode', () => {
     const style = node?.getAttribute('style') || '';
     expect(style).toContain('box-shadow');
   });
+
+  it('renders condition handles with yes/no colors on NOT EXIT', () => {
+    const { container } = render(
+      <ReactFlowProvider>
+        <FlowNode
+          {...makeProps({
+            label: 'NOT EXIT',
+            nodeType: 'operators.not_exit',
+            uiConfig: {
+              shape: 'downtriangle',
+              color: '#ef4444',
+              handles: {
+                mode: 'condition',
+                inputs: 2,
+                outputs: 1,
+                inputColors: ['#22c55e', '#ef4444'],
+                inputLabels: ['yes', 'no'],
+              },
+            },
+          })}
+        />
+      </ReactFlowProvider>
+    );
+    const targets = container.querySelectorAll(
+      '.react-flow__handle[data-handlepos="top"], .react-flow__handle-top'
+    );
+    // React Flow sets data-handlepos; also count target handles via title/id.
+    const input0 = container.querySelector(
+      '[data-handle-id="input-0"], #input-0, [data-testid*="input-0"]'
+    );
+    const input1 = container.querySelector('#second-input, [data-handle-id="input-1"]');
+    const yesLabel = container.textContent?.includes('yes');
+    const noLabel = container.textContent?.includes('no');
+    expect(yesLabel).toBe(true);
+    expect(noLabel).toBe(true);
+    expect(input0 || targets.length >= 2).toBeTruthy();
+    expect(input1 || targets.length >= 2).toBeTruthy();
+  });
+
+  it('renders three inputs on a rectangle (corners + middle)', () => {
+    const { container } = render(
+      <ReactFlowProvider>
+        <FlowNode
+          {...makeProps({
+            label: 'Merge',
+            nodeType: 'data.merge',
+            uiConfig: { handles: { inputs: 3, outputs: 2 } },
+          })}
+        />
+      </ReactFlowProvider>
+    );
+    expect(container.querySelector('[data-handle-inputs="3"]')).toBeTruthy();
+    expect(container.querySelector('[data-handle-outputs="2"]')).toBeTruthy();
+    const targets = container.querySelectorAll(
+      '.react-flow__handle.target, [data-handlepos="top"]'
+    );
+    // jsdom + React Flow: at least the configured input handles exist.
+    const handleNodes = container.querySelectorAll('.react-flow__handle');
+    expect(handleNodes.length).toBeGreaterThanOrEqual(5); // 3 in + 2 out
+    void targets;
+  });
 });
