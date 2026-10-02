@@ -67,13 +67,35 @@
   display: none;
 }
 
-/* ====== Diamond (Operators) ====== */
+/* ====== Diamond (Operators) ======
+   Size classes set min-width/max-width for rectangles; diamonds must
+   neutralize those constraints or the node becomes a huge rotated box. */
 .shapeDiamond {
-  width: 50px;
-  height: 50px;
+  width: 56px;
+  height: 56px;
+  min-width: 0;
+  max-width: none;
   transform: rotate(45deg);
   border-radius: var(--ef-radius-xl);
   overflow: visible;
+}
+.shapeDiamond.sizeSmall {
+  width: 48px;
+  height: 48px;
+  min-width: 0;
+  max-width: none;
+}
+.shapeDiamond.sizeMedium {
+  width: 72px;
+  height: 72px;
+  min-width: 0;
+  max-width: none;
+}
+.shapeDiamond.sizeLarge {
+  width: 96px;
+  height: 96px;
+  min-width: 0;
+  max-width: none;
 }
 .shapeDiamond .header {
   width: 100%;
@@ -86,12 +108,18 @@
   border-radius: var(--ef-radius-lg);
 }
 .shapeDiamond .title {
-  font-size: 0.7rem;
+  font-size: 0.625rem;
   font-weight: 600;
+  line-height: 1.1;
   transform: rotate(-45deg);
   margin: 0;
-  margin-top: 12px;
-  margin-left: 14px;
+  text-align: center;
+  /* Diagonal of the rotated square ≈ side * √2 — keep label inside. */
+  max-width: 6.5rem;
+  padding: 0 0.15rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .shapeDiamond .icon {
   display: none;
@@ -144,10 +172,17 @@
   z-index: 1;
 }
 .shapeDowntriangle .title {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
   transform: none;
   margin: 0;
+  text-align: center;
+  max-width: 100%;
+  padding: 0 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.15;
 }
 .shapeDowntriangle .icon {
   display: none;

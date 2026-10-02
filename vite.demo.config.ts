@@ -3,11 +3,11 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
 /**
- * Vite config for the GitHub Pages demo app.
+ * Vite config for the GitHub Pages demo app (used by `npm run build:demo`).
  *
- * Builds `examples/basic` with `base: '/easyworkflow/'` so assets resolve
- * correctly under https://<user>.github.io/easyworkflow/.
- * For a custom domain, change `base` to `'/'`.
+ * Always builds with `base: '/easyworkflow/'` so assets resolve under
+ * https://<user>.github.io/easyworkflow/.
+ * Output: examples/basic/dist (matches .github/workflows/deploy-demo.yml).
  */
 export default defineConfig({
   root: resolve(__dirname, 'examples/basic'),
