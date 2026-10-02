@@ -11,8 +11,12 @@
   transition: width var(--ef-transition-slow);
   flex-shrink: 0;
 }
-.panelPalette { width: 300px; }
-.panelEditor  { width: 420px; }
+.panelPalette {
+  width: 300px;
+}
+.panelEditor {
+  width: 420px;
+}
 
 /* Panel header */
 .panelHeader {
@@ -38,7 +42,9 @@
   flex-direction: column;
   gap: 1rem;
 }
-.edgeInfoContent { flex: 1; }
+.edgeInfoContent {
+  flex: 1;
+}
 .edgeInfoRow {
   display: flex;
   justify-content: space-between;

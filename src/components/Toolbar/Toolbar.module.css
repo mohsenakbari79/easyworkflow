@@ -46,7 +46,9 @@
   font-size: var(--ef-text-md);
   font-weight: 600;
   outline: none;
-  transition: border-color var(--ef-transition-fast), box-shadow var(--ef-transition-fast);
+  transition:
+    border-color var(--ef-transition-fast),
+    box-shadow var(--ef-transition-fast);
 }
 .titleInput:focus {
   border-color: var(--ef-primary) !important;

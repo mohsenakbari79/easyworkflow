@@ -19,17 +19,30 @@
 }
 
 .node.selected {
-  box-shadow: 0 0 0 2px var(--ef-primary), var(--ef-shadow-lg);
+  box-shadow:
+    0 0 0 2px var(--ef-primary),
+    var(--ef-shadow-lg);
   transform: scale(1.03);
 }
 
 /* ====== Sizes ====== */
-.sizeSmall  { min-width: 50px;  max-width: 120px; }
-.sizeMedium { min-width: 160px; max-width: 200px; }
-.sizeLarge  { min-width: 220px; max-width: 280px; }
+.sizeSmall {
+  min-width: 50px;
+  max-width: 120px;
+}
+.sizeMedium {
+  min-width: 160px;
+  max-width: 200px;
+}
+.sizeLarge {
+  min-width: 220px;
+  max-width: 280px;
+}
 
 /* ====== Rectangle ====== */
-.shapeRectangle { border-radius: var(--ef-radius-lg); }
+.shapeRectangle {
+  border-radius: var(--ef-radius-lg);
+}
 
 /* ====== Ellipse (Start/End) ====== */
 .shapeEllipse {
@@ -50,7 +63,9 @@
   align-items: center;
   padding: 0.2rem;
 }
-.shapeEllipse .body { display: none; }
+.shapeEllipse .body {
+  display: none;
+}
 
 /* ====== Diamond (Operators) ====== */
 .shapeDiamond {
@@ -78,9 +93,15 @@
   margin-top: 12px;
   margin-left: 14px;
 }
-.shapeDiamond .icon { display: none; }
-.shapeDiamond .body { display: none; }
-.shapeDiamond .handle { transform: rotate(-45deg); }
+.shapeDiamond .icon {
+  display: none;
+}
+.shapeDiamond .body {
+  display: none;
+}
+.shapeDiamond .handle {
+  transform: rotate(-45deg);
+}
 
 /* ====== Down Triangle (binary operators) ====== */
 .shapeDowntriangle {
@@ -128,10 +149,20 @@
   transform: none;
   margin: 0;
 }
-.shapeDowntriangle .icon { display: none; }
-.shapeDowntriangle .body { display: none; }
-.shapeDowntriangle .handleCornerRight { left: 94% !important; top: -6px !important; }
-.shapeDowntriangle .handleCornerLeft  { margin: -1px -18px !important; top: -6px !important; }
+.shapeDowntriangle .icon {
+  display: none;
+}
+.shapeDowntriangle .body {
+  display: none;
+}
+.shapeDowntriangle .handleCornerRight {
+  left: 94% !important;
+  top: -6px !important;
+}
+.shapeDowntriangle .handleCornerLeft {
+  margin: -1px -18px !important;
+  top: -6px !important;
+}
 .shapeDowntriangle .handle {
   transform: none;
   margin: -1px -8px;
@@ -191,7 +222,9 @@
   height: 14px !important;
   background: var(--ef-primary) !important;
   border: 2px solid var(--ef-card-bg) !important;
-  box-shadow: 0 0 0 1px var(--ef-border-strong), var(--ef-shadow-xs);
+  box-shadow:
+    0 0 0 1px var(--ef-border-strong),
+    var(--ef-shadow-xs);
   transition: transform var(--ef-transition-fast);
 }
 .handle:hover {
@@ -212,5 +245,9 @@
 }
 
 /* Global handle position overrides */
-:global(.react-flow__handle-top)    { top: -13px !important; }
-:global(.react-flow__handle-bottom) { bottom: -13px !important; }
+:global(.react-flow__handle-top) {
+  top: -13px !important;
+}
+:global(.react-flow__handle-bottom) {
+  bottom: -13px !important;
+}

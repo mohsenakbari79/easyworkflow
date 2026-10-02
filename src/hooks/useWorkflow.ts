@@ -1,10 +1,10 @@
-import { useReducer, useCallback, useMemo, useRef } from 'react';
-import type { EasyFlowNode, EasyFlowEdge, EasyFlowNodeData, WorkflowMetadata, NodeStatus } from '../types/node';
+import { useReducer, useCallback, useMemo, useRef, useEffect } from 'react';
+import type { EasyFlowNode, EasyFlowEdge, WorkflowMetadata, NodeStatus } from '../types/node';
 import type { WorkflowState, WorkflowAction } from '../types/workflow';
 import type { CardDefinition } from '../types/card';
 import type { APIAdapter } from '../types/api';
 import { generateNodeId } from '../utils/nodeId';
-import { pickLocalized, extractLocalizedMap } from '../utils/localization';
+import { pickLocalized } from '../utils/localization';
 import { normalizeCategoryKey } from '../utils/category';
 
 function workflowReducer(state: WorkflowState, action: WorkflowAction): WorkflowState {
@@ -115,13 +115,18 @@ function buildCardLocaleMap(
  * ```
  */
 export function useWorkflow(options: UseWorkflowOptions = {}) {
-  const { adapter, locale = 'en' } = options;
+  const { adapter: _adapter, locale = 'en' } = options;
   const [state, dispatch] = useReducer(workflowReducer, initialState);
 
   const nodesRef = useRef(state.nodes);
   const edgesRef = useRef(state.edges);
-  nodesRef.current = state.nodes;
-  edgesRef.current = state.edges;
+  // Keep refs in sync after commit (not during render) per React rules.
+  useEffect(() => {
+    nodesRef.current = state.nodes;
+  }, [state.nodes]);
+  useEffect(() => {
+    edgesRef.current = state.edges;
+  }, [state.edges]);
 
   const addNode = useCallback(
     (card: CardDefinition) => {
@@ -129,20 +134,22 @@ export function useWorkflow(options: UseWorkflowOptions = {}) {
       const categoryKey = normalizeCategoryKey(card.category);
 
       // Build locale maps from card (supports i18n maps and legacy _fa/_en fields)
-      const labelMap = buildCardLocaleMap(
-        card,
-        card.display_name_i18n as unknown as string,
-        card.display_name_fa,
-        card.display_name_en,
-        card.display_name
-      ) || {};
-      const descMap = buildCardLocaleMap(
-        card,
-        card.description_i18n as unknown as string,
-        card.description_fa,
-        card.description_en,
-        card.description
-      ) || {};
+      const labelMap =
+        buildCardLocaleMap(
+          card,
+          card.display_name_i18n as unknown as string,
+          card.display_name_fa,
+          card.display_name_en,
+          card.display_name
+        ) || {};
+      const descMap =
+        buildCardLocaleMap(
+          card,
+          card.description_i18n as unknown as string,
+          card.description_fa,
+          card.description_en,
+          card.description
+        ) || {};
 
       const label = pickLocalized(locale, labelMap, card.card_key);
       const description = pickLocalized(locale, descMap, '');
@@ -189,15 +196,21 @@ export function useWorkflow(options: UseWorkflowOptions = {}) {
     dispatch({ type: 'REMOVE_NODE', nodeId });
   }, []);
 
-  const setNodes = useCallback((nodes: EasyFlowNode[] | ((prev: EasyFlowNode[]) => EasyFlowNode[])) => {
-    const next = typeof nodes === 'function' ? nodes(nodesRef.current) : nodes;
-    dispatch({ type: 'SET_NODES', nodes: next });
-  }, []);
+  const setNodes = useCallback(
+    (nodes: EasyFlowNode[] | ((prev: EasyFlowNode[]) => EasyFlowNode[])) => {
+      const next = typeof nodes === 'function' ? nodes(nodesRef.current) : nodes;
+      dispatch({ type: 'SET_NODES', nodes: next });
+    },
+    []
+  );
 
-  const setEdges = useCallback((edges: EasyFlowEdge[] | ((prev: EasyFlowEdge[]) => EasyFlowEdge[])) => {
-    const next = typeof edges === 'function' ? edges(edgesRef.current) : edges;
-    dispatch({ type: 'SET_EDGES', edges: next });
-  }, []);
+  const setEdges = useCallback(
+    (edges: EasyFlowEdge[] | ((prev: EasyFlowEdge[]) => EasyFlowEdge[])) => {
+      const next = typeof edges === 'function' ? edges(edgesRef.current) : edges;
+      dispatch({ type: 'SET_EDGES', edges: next });
+    },
+    []
+  );
 
   const setMetadata = useCallback((metadata: Partial<WorkflowMetadata>) => {
     dispatch({ type: 'SET_METADATA', metadata });
@@ -222,7 +235,10 @@ export function useWorkflow(options: UseWorkflowOptions = {}) {
     []
   );
 
-  const selectedNode = useMemo(() => state.nodes.find((n) => n.id === state.metadata.selectedNodeId) || null, [state]);
+  const selectedNode = useMemo(
+    () => state.nodes.find((n) => n.id === state.metadata.selectedNodeId) || null,
+    [state]
+  );
 
   const variableSuggestions = useMemo(() => {
     const triggerNode = state.nodes.find((n) =>

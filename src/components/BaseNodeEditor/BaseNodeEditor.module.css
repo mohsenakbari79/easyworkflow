@@ -29,14 +29,20 @@
   padding-inline-end: 0.25rem;
   margin-inline-end: -0.25rem;
 }
-.form::-webkit-scrollbar { width: 6px; }
-.form::-webkit-scrollbar-track { background: transparent; }
+.form::-webkit-scrollbar {
+  width: 6px;
+}
+.form::-webkit-scrollbar-track {
+  background: transparent;
+}
 .form::-webkit-scrollbar-thumb {
   background: var(--ef-border-strong);
   border-radius: var(--ef-radius-full);
 }
 
-.formGroup { margin-bottom: 0.875rem; }
+.formGroup {
+  margin-bottom: 0.875rem;
+}
 .label {
   display: block;
   font-size: var(--ef-text-sm);
@@ -53,9 +59,13 @@
   color: var(--ef-text-color);
   font-size: var(--ef-text-base);
   outline: none;
-  transition: border-color var(--ef-transition-fast), box-shadow var(--ef-transition-fast);
+  transition:
+    border-color var(--ef-transition-fast),
+    box-shadow var(--ef-transition-fast);
 }
-.input::placeholder { color: var(--ef-text-muted); }
+.input::placeholder {
+  color: var(--ef-text-muted);
+}
 .input:focus {
   border-color: var(--ef-primary);
   box-shadow: var(--ef-shadow-focus);
@@ -66,7 +76,10 @@
   font-family: inherit;
   line-height: 1.5;
 }
-.select { appearance: auto; cursor: pointer; }
+.select {
+  appearance: auto;
+  cursor: pointer;
+}
 
 .divider {
   height: 1px;
@@ -80,7 +93,9 @@
   padding-top: 1rem;
   border-top: 1px solid var(--ef-border-color);
 }
-.spacer { flex: 1; }
+.spacer {
+  flex: 1;
+}
 
 /* Local buttons (mirror .ef-btn look, scoped to module) */
 .btn {
@@ -94,21 +109,38 @@
   font-weight: 500;
   font-size: var(--ef-text-base);
   cursor: pointer;
-  transition: background var(--ef-transition-fast),
-              border-color var(--ef-transition-fast),
-              box-shadow var(--ef-transition-fast),
-              transform var(--ef-transition-fast);
+  transition:
+    background var(--ef-transition-fast),
+    border-color var(--ef-transition-fast),
+    box-shadow var(--ef-transition-fast),
+    transform var(--ef-transition-fast);
   white-space: nowrap;
   outline: none;
   box-shadow: var(--ef-shadow-xs);
 }
-.btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--ef-shadow-sm); }
-.btn:active:not(:disabled) { transform: translateY(0); box-shadow: var(--ef-shadow-xs); }
-.btn:focus-visible { box-shadow: var(--ef-shadow-focus); }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--ef-shadow-sm);
+}
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--ef-shadow-xs);
+}
+.btn:focus-visible {
+  box-shadow: var(--ef-shadow-focus);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
-.btnPrimary { background: var(--ef-primary); color: #fff; }
-.btnPrimary:hover:not(:disabled) { background: var(--ef-primary-hover); }
+.btnPrimary {
+  background: var(--ef-primary);
+  color: #fff;
+}
+.btnPrimary:hover:not(:disabled) {
+  background: var(--ef-primary-hover);
+}
 
 .btnSecondary {
   background: var(--ef-bg);
@@ -120,11 +152,18 @@
   border-color: var(--ef-border-strong);
 }
 
-.btnDanger { background: var(--ef-danger); color: #fff; }
-.btnDanger:hover:not(:disabled) { background: var(--ef-danger-hover); }
+.btnDanger {
+  background: var(--ef-danger);
+  color: #fff;
+}
+.btnDanger:hover:not(:disabled) {
+  background: var(--ef-danger-hover);
+}
 
 /* Schema-driven fields */
-.schemaField { margin-bottom: 0.875rem; }
+.schemaField {
+  margin-bottom: 0.875rem;
+}
 .schemaFieldLabel {
   display: block;
   font-size: var(--ef-text-xs);

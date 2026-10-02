@@ -12,9 +12,7 @@ export function normalizeCategoryKey(value: string | undefined | null): string {
 /** Convert a category key like 'my_category' to 'My Category'. */
 export function humanizeCategoryLabel(value: string): string {
   if (!value) return 'Other';
-  return value
-    .replace(/[_-]/g, ' ')
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+  return value.replace(/[_-]/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 /**

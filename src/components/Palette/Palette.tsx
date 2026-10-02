@@ -47,10 +47,7 @@ function matchesSearch(card: CardDefinition, query: string): boolean {
  * Filter a category tree to cards/children that match `query`.
  * Empty categories are pruned entirely.
  */
-function filterTree(
-  items: CardCategoryNode[],
-  query: string
-): CardCategoryNode[] {
+function filterTree(items: CardCategoryNode[], query: string): CardCategoryNode[] {
   if (!query) return items;
   return items
     .map((cat) => {
@@ -105,13 +102,13 @@ function CategoryTree({
   searchQuery,
 }: CategoryTreeProps) {
   const { t } = useTranslation();
-  const categories = (t('categories') || {}) as Record<string, string>;
 
   const getCategoryLabel = useCallback(
     (node: CardCategoryNode) => {
+      const categories = (t('categories') || {}) as Record<string, string>;
       return categories[node.segment] || humanizeCategoryLabel(node.segment);
     },
-    [categories]
+    [t]
   );
 
   return (
@@ -154,17 +151,16 @@ function CategoryTree({
                       <button
                         key={card.id}
                         className={styles.item}
-                        onClick={(e) => { e.stopPropagation(); onAddNode(card); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAddNode(card);
+                        }}
                         title={getDescription(locale, card)}
                       >
                         <span className={styles.itemIcon}>{card.icon || '📋'}</span>
                         <div className={styles.texts}>
-                          <div className={styles.itemTitle}>
-                            {getDisplayName(locale, card)}
-                          </div>
-                          <div className={styles.itemDesc}>
-                            {getDescription(locale, card)}
-                          </div>
+                          <div className={styles.itemTitle}>{getDisplayName(locale, card)}</div>
+                          <div className={styles.itemDesc}>{getDescription(locale, card)}</div>
                         </div>
                       </button>
                     ))}

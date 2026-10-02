@@ -17,15 +17,10 @@ export default defineConfig({
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'EasyFlow',
       formats: ['es', 'cjs'],
-      fileName: (format) => format === 'es' ? 'index.js' : 'index.cjs',
+      fileName: (format) => (format === 'es' ? 'index.js' : 'index.cjs'),
     },
     rollupOptions: {
-      external: [
-        'react',
-        'react-dom',
-        'react/jsx-runtime',
-        '@xyflow/react',
-      ],
+      external: ['react', 'react-dom', 'react/jsx-runtime', '@xyflow/react'],
       output: {
         assetFileNames: (assetInfo) => {
           if (assetInfo.name === 'style.css' || assetInfo.name?.endsWith('.css')) {

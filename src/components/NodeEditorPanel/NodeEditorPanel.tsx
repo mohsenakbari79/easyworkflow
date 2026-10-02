@@ -143,17 +143,11 @@ export function NodeEditorPanel({
             </div>
           </div>
           <div className={styles.formActions}>
-            <button
-              className="ef-btn ef-btn-secondary"
-              onClick={() => onSetMode('palette')}
-            >
+            <button className="ef-btn ef-btn-secondary" onClick={() => onSetMode('palette')}>
               {t('edgeInfo.close', 'Close')}
             </button>
             <div style={{ flex: 1 }} />
-            <button
-              className="ef-btn ef-btn-danger"
-              onClick={onDeleteEdge}
-            >
+            <button className="ef-btn ef-btn-danger" onClick={onDeleteEdge}>
               {t('edgeInfo.delete', 'Delete edge')}
             </button>
           </div>

@@ -61,9 +61,14 @@
   font-size: var(--ef-text-md);
   font-weight: 600;
   outline: none;
-  transition: border-color var(--ef-transition-fast), box-shadow var(--ef-transition-fast);
+  transition:
+    border-color var(--ef-transition-fast),
+    box-shadow var(--ef-transition-fast);
 }
-.titleInput::placeholder { font-weight: 500; color: var(--ef-text-muted); }
+.titleInput::placeholder {
+  font-weight: 500;
+  color: var(--ef-text-muted);
+}
 .titleInput:focus {
   border-color: var(--ef-primary) !important;
   box-shadow: var(--ef-shadow-focus);
@@ -80,7 +85,9 @@
   font-weight: 500;
   outline: none;
   cursor: pointer;
-  transition: border-color var(--ef-transition-fast), box-shadow var(--ef-transition-fast);
+  transition:
+    border-color var(--ef-transition-fast),
+    box-shadow var(--ef-transition-fast);
 }
 .typeSelect:focus {
   border-color: var(--ef-primary);
@@ -134,8 +141,12 @@
   transition: width var(--ef-transition-slow);
   flex-shrink: 0;
 }
-.panelPalette { width: 300px; }
-.panelEditor  { width: 420px; }
+.panelPalette {
+  width: 300px;
+}
+.panelEditor {
+  width: 420px;
+}
 
 /* ====== Loading ====== */
 .loading {
@@ -157,7 +168,9 @@
   animation: ef-spin 0.7s linear infinite;
 }
 @keyframes ef-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ====== Responsive: Tablet (max-width 900px) ====== */

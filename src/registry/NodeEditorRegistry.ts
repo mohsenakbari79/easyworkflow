@@ -13,7 +13,11 @@ class NodeEditorRegistryClass {
    * @param match - Node type string or predicate function.
    * @param component - React component to render as the editor.
    */
-  register(key: string, match: string | ((nodeType: string) => boolean), component: NodeEditorComponent) {
+  register(
+    key: string,
+    match: string | ((nodeType: string) => boolean),
+    component: NodeEditorComponent
+  ) {
     this.entries.push({ match, component, key });
   }
 

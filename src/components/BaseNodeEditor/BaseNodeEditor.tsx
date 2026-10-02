@@ -6,14 +6,17 @@
  * registered for the node type.
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import type { EasyFlowNode, EasyFlowNodeData, ParameterSchema } from '../../types/node';
+import React, { useState, useCallback, useMemo } from 'react';
+import type { EasyFlowNode } from '../../types/node';
 import { pickLocalized } from '../../utils/localization';
 import { useTranslation } from '../../hooks/useTranslation';
 import styles from './BaseNodeEditor.module.css';
 
 /**
  * Props for {@link BaseNodeEditor}.
+ *
+ * `variableSuggestions` is accepted for API compatibility with custom
+ * editors; the default form does not render a suggestions picker.
  */
 export interface BaseNodeEditorProps {
   /** Node being edited. */
@@ -29,7 +32,10 @@ export interface BaseNodeEditorProps {
   /** Optional `{{ payload.* }}` suggestion tokens. */
   variableSuggestions?: string[];
   /** Optional custom parameter builder overriding schema/default extraction. */
-  parameterBuilder?: (draft: Record<string, unknown>, node: EasyFlowNode) => Record<string, unknown>;
+  parameterBuilder?: (
+    draft: Record<string, unknown>,
+    node: EasyFlowNode
+  ) => Record<string, unknown>;
 }
 
 /**
@@ -51,7 +57,8 @@ export function BaseNodeEditor({
   onDelete,
   onCancel,
   children,
-  variableSuggestions = [],
+  // Accepted for API parity with custom editors; unused by the default form.
+  variableSuggestions: _variableSuggestions = [],
   parameterBuilder,
 }: BaseNodeEditorProps) {
   const { t, locale } = useTranslation();
@@ -77,14 +84,18 @@ export function BaseNodeEditor({
     };
   }, [node, locale]);
 
-  const [draft, setDraft] = useState<Record<string, unknown>>(buildDraft);
-
-  useEffect(() => {
+  const draftKey = `${node?.id ?? ''}:${locale}`;
+  const [draft, setDraft] = useState<Record<string, unknown>>(() => buildDraft());
+  const [prevDraftKey, setPrevDraftKey] = useState(draftKey);
+  if (prevDraftKey !== draftKey) {
+    setPrevDraftKey(draftKey);
     setDraft(buildDraft());
-  }, [buildDraft]);
+  }
 
   const schemaProperties = useMemo(() => {
-    return node?.data?.parametersSchema?.properties || node?.data?.parameters_schema?.properties || {};
+    return (
+      node?.data?.parametersSchema?.properties || node?.data?.parameters_schema?.properties || {}
+    );
   }, [node?.data?.parametersSchema, node?.data?.parameters_schema]);
 
   const handleChange = useCallback((field: string, value: unknown) => {
@@ -120,7 +131,8 @@ export function BaseNodeEditor({
         label: (draft.label as string) || node.data.label,
         label_i18n: (draft.label_i18n as Record<string, string>) || node.data.label_i18n,
         description: (draft.description as string) || node.data.description,
-        description_i18n: (draft.description_i18n as Record<string, string>) || node.data.description_i18n,
+        description_i18n:
+          (draft.description_i18n as Record<string, string>) || node.data.description_i18n,
         parameters,
       },
     };
@@ -143,7 +155,9 @@ export function BaseNodeEditor({
     <div className={styles.editor}>
       <div className={styles.header}>
         <h3 className={styles.title}>{t('editor.title', 'Edit Node')}</h3>
-        <span className={styles.hint}>{t('editor.nodeId', 'ID')}: {node?.id}</span>
+        <span className={styles.hint}>
+          {t('editor.nodeId', 'ID')}: {node?.id}
+        </span>
       </div>
 
       <div className={styles.form}>
@@ -190,7 +204,11 @@ export function BaseNodeEditor({
         <button type="button" className={`${styles.btn} ${styles.btnSecondary}`} onClick={onCancel}>
           {t('editor.cancel', 'Cancel')}
         </button>
-        <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={handleConfirm}>
+        <button
+          type="button"
+          className={`${styles.btn} ${styles.btnPrimary}`}
+          onClick={handleConfirm}
+        >
           {t('editor.confirm', 'Confirm')}
         </button>
       </div>

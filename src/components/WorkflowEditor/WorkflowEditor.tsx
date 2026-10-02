@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useState, useRef, Component } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 import type { Node, Edge, Connection, NodeChange, EdgeChange } from '@xyflow/react';
 import { ReactFlowProvider, applyNodeChanges, applyEdgeChanges, addEdge } from '@xyflow/react';
-import type { EasyFlowNode, EasyFlowEdge, WorkflowMetadata } from '../../types/node';
+import type { EasyFlowNode, EasyFlowEdge } from '../../types/node';
 import type { CardDefinition } from '../../types/card';
 import type { APIAdapter } from '../../types/api';
 import type { NodeEditorComponent } from '../../types/editor';
@@ -17,12 +17,25 @@ import styles from './WorkflowEditor.module.css';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null };
-  static getDerivedStateFromError(error: Error) { return { error }; }
-  componentDidCatch(error: Error, info: ErrorInfo) { console.error('[EasyFlow ErrorBoundary]', error, info); }
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error('[EasyFlow ErrorBoundary]', error, info);
+  }
   render() {
     if (this.state.error) {
       return (
-        <div style={{ padding: 20, background: '#fee', border: '2px solid #fcc', borderRadius: 8, margin: 20, fontFamily: 'monospace' }}>
+        <div
+          style={{
+            padding: 20,
+            background: '#fee',
+            border: '2px solid #fcc',
+            borderRadius: 8,
+            margin: 20,
+            fontFamily: 'monospace',
+          }}
+        >
           <h3 style={{ color: '#c00' }}>EasyFlow Error</h3>
           <pre style={{ whiteSpace: 'pre-wrap', fontSize: 13 }}>{this.state.error.message}</pre>
         </div>
@@ -97,7 +110,11 @@ export interface WorkflowEditorProps {
   /** Active locale code (e.g. `en`, `fa`). Prefer `EasyFlowI18nProvider`. */
   locale?: string;
   /** Additional custom node editors registered for this editor instance. */
-  customEditors?: { match: string | ((nodeType: string) => boolean); component: NodeEditorComponent; key: string }[];
+  customEditors?: {
+    match: string | ((nodeType: string) => boolean);
+    component: NodeEditorComponent;
+    key: string;
+  }[];
   /**
    * Define the toolbar actions. If omitted, only a default Save button renders.
    * When provided, renders exactly these actions — no built-in buttons are injected.
@@ -109,7 +126,13 @@ export interface WorkflowEditorProps {
    * Called when the user triggers save. Receives the full workflow payload
    * (nodes, edges, name, type, id) that would be sent to the adapter.
    */
-  onSave?: (workflow: { id?: string; name: string; type: string; nodes: EasyFlowNode[]; edges: EasyFlowEdge[] }) => void;
+  onSave?: (workflow: {
+    id?: string;
+    name: string;
+    type: string;
+    nodes: EasyFlowNode[];
+    edges: EasyFlowEdge[];
+  }) => void;
   /** Called when the user triggers execute for an existing workflow. */
   onExecute?: (workflowId: string) => void;
   /** Called when the user triggers validate for an existing workflow. */
@@ -140,13 +163,10 @@ function WorkflowEditorInner({
   const { t, locale, isRTL } = useTranslation();
   const isEditMode = !!workflowId && workflowId !== 'new';
 
-  const {
-    updateNode,
-    removeNode,
-    setMetadata,
-    reset,
-    variableSuggestions,
-  } = useWorkflow({ adapter, locale });
+  const { updateNode, removeNode, setMetadata, reset, variableSuggestions } = useWorkflow({
+    adapter,
+    locale,
+  });
 
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
@@ -156,19 +176,13 @@ function WorkflowEditorInner({
   const [isSaving, setIsSaving] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(() => isEditMode && !!adapter?.loadWorkflow);
   const [panelMode, setPanelMode] = useState<PanelMode>('palette');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [nodeStatuses] = useState<Record<string, string>>({});
 
   const [clipboard, setClipboard] = useState<EasyFlowNode | null>(null);
-  const selectedNodeIdRef = useRef(selectedNodeId);
-  selectedNodeIdRef.current = selectedNodeId;
-  const nodesRef = useRef(nodes);
-  const edgesRef = useRef(edges);
-  nodesRef.current = nodes;
-  edgesRef.current = edges;
 
   const onNodesChange = useCallback((changes: NodeChange[]) => {
     setNodes((nds) => applyNodeChanges(changes, nds));
@@ -189,77 +203,100 @@ function WorkflowEditorInner({
     };
   }, [customEditors]);
 
+  // Load palette cards from the adapter. When the adapter has no getCards,
+  // fall back to initialCards without extra state.
+  const hasAdapterCards = !!adapter?.getCards;
   useEffect(() => {
-    if (adapter?.getCards) {
-      adapter.getCards().then(setAvailableCards).catch(() => setAvailableCards([]));
-    } else {
-      setAvailableCards(initialCards);
-    }
-  }, [adapter, initialCards]);
+    if (!adapter?.getCards) return;
+    let cancelled = false;
+    adapter
+      .getCards()
+      .then((cards) => {
+        if (!cancelled) setAvailableCards(cards);
+      })
+      .catch(() => {
+        if (!cancelled) setAvailableCards([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [adapter]);
 
+  const effectiveCards = hasAdapterCards ? availableCards : initialCards;
+
+  // Load an existing workflow when workflowId is provided.
+  // Loading state is set only inside async callbacks.
   useEffect(() => {
-    if (isEditMode && workflowId && adapter?.loadWorkflow) {
-      setIsLoading(true);
-      adapter
-        .loadWorkflow(workflowId)
-        .then((wf) => {
-          setNodes(wf.nodes as Node[]);
-          setEdges(wf.edges as Edge[]);
-          setWorkflowName(wf.name || '');
-          setWorkflowType(wf.type || 'general');
-          setMetadata({ id: wf.id, name: wf.name, type: wf.type });
-        })
-        .catch(() => {
-          showToast?.('error', t('toasts.workflowLoadError', 'Failed to load workflow'));
-        })
-        .finally(() => setIsLoading(false));
-    }
+    if (!(isEditMode && workflowId && adapter?.loadWorkflow)) return;
+    let cancelled = false;
+    adapter
+      .loadWorkflow(workflowId)
+      .then((wf) => {
+        if (cancelled) return;
+        setNodes(wf.nodes as Node[]);
+        setEdges(wf.edges as Edge[]);
+        setWorkflowName(wf.name || '');
+        setWorkflowType(wf.type || 'general');
+        setMetadata({ id: wf.id, name: wf.name, type: wf.type });
+        setIsLoading(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        showToast?.('error', t('toasts.workflowLoadError', 'Failed to load workflow'));
+        setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [isEditMode, workflowId, adapter, setMetadata, showToast, t]);
 
-  useEffect(() => {
-    setNodes((prev) =>
-      prev.map((node) => {
-        const data = node.data as Record<string, unknown>;
-        const labelMap = (data.label_i18n as Record<string, string>) || {
-          ...(data.label_en ? { en: data.label_en as string } : {}),
-          ...(data.label_fa ? { fa: data.label_fa as string } : {}),
-          ...(data.label ? { default: data.label as string } : {}),
-        };
-        const descMap = (data.description_i18n as Record<string, string>) || {
-          ...(data.description_en ? { en: data.description_en as string } : {}),
-          ...(data.description_fa ? { fa: data.description_fa as string } : {}),
-          ...(data.description ? { default: data.description as string } : {}),
-        };
-        const newLabel = pickLocalized(locale, labelMap, data.label as string);
-        const newDesc = pickLocalized(locale, descMap, data.description as string);
-        if (newLabel === data.label && newDesc === data.description) return node;
-        return { ...node, data: { ...data, label: newLabel, description: newDesc } };
-      })
-    );
-  }, [locale]);
+  // Localized view of nodes (derived — does not mutate state).
+  const localizedNodes = useMemo(() => {
+    return nodes.map((node) => {
+      const data = node.data as Record<string, unknown>;
+      const labelMap = (data.label_i18n as Record<string, string>) || {
+        ...(data.label_en ? { en: data.label_en as string } : {}),
+        ...(data.label_fa ? { fa: data.label_fa as string } : {}),
+        ...(data.label ? { default: data.label as string } : {}),
+      };
+      const descMap = (data.description_i18n as Record<string, string>) || {
+        ...(data.description_en ? { en: data.description_en as string } : {}),
+        ...(data.description_fa ? { fa: data.description_fa as string } : {}),
+        ...(data.description ? { default: data.description as string } : {}),
+      };
+      const newLabel = pickLocalized(locale, labelMap, data.label as string);
+      const newDesc = pickLocalized(locale, descMap, data.description as string);
+      if (newLabel === data.label && newDesc === data.description) return node;
+      return { ...node, data: { ...data, label: newLabel, description: newDesc } };
+    });
+  }, [nodes, locale]);
 
   const selectedNode = useMemo(() => {
-    const base = nodes.find((n) => n.id === selectedNodeId) || null;
+    const base = localizedNodes.find((n) => n.id === selectedNodeId) || null;
     if (!base) return null;
     const data = base.data as Record<string, unknown>;
     const nodeType = (data.nodeType as string) || '';
-    const isBinaryOp = nodeType.startsWith('operator.exit') || nodeType.startsWith('operator.not_exit');
+    const isBinaryOp =
+      nodeType.startsWith('operator.exit') || nodeType.startsWith('operator.not_exit');
     if (!isBinaryOp) return base;
     const incoming = edges.filter((e) => e.target === base.id);
     let parent1: string | null = null;
     let parent2: string | null = null;
     incoming.forEach((edge) => {
-      const srcNode = nodes.find((n) => n.id === edge.source);
-      const label = (srcNode?.data as Record<string, unknown>)?.label as string || edge.source;
+      const srcNode = localizedNodes.find((n) => n.id === edge.source);
+      const label = ((srcNode?.data as Record<string, unknown>)?.label as string) || edge.source;
       if (edge.targetHandle === 'second-input') {
         parent2 = label;
       } else if (!parent1) {
         parent1 = label;
       }
     });
-    if (!parent1 && parent2) { parent1 = parent2; parent2 = null; }
+    if (!parent1 && parent2) {
+      parent1 = parent2;
+      parent2 = null;
+    }
     return { ...base, data: { ...data, parents: [parent1, parent2].filter(Boolean) } };
-  }, [nodes, edges, selectedNodeId]);
+  }, [localizedNodes, edges, selectedNodeId]);
 
   const selectedEdge = useMemo(
     () => edges.find((e) => e.id === selectedEdgeId) || null,
@@ -331,7 +368,9 @@ function WorkflowEditorInner({
     if (!selectedNodeId) return;
     removeNode(selectedNodeId);
     setNodes((prev) => prev.filter((n) => n.id !== selectedNodeId));
-    setEdges((prev) => prev.filter((e) => e.source !== selectedNodeId && e.target !== selectedNodeId));
+    setEdges((prev) =>
+      prev.filter((e) => e.source !== selectedNodeId && e.target !== selectedNodeId)
+    );
     setSelectedNodeId(null);
     setPanelMode('palette');
     showToast?.('info', t('toasts.nodeDeleted', 'Node deleted'));
@@ -343,15 +382,14 @@ function WorkflowEditorInner({
   }, []);
 
   const handleCopyNode = useCallback(() => {
-    const nodeId = selectedNodeIdRef.current;
-    if (!nodeId) return;
+    if (!selectedNodeId) return;
     setNodes((prev) => {
-      const node = prev.find((n) => n.id === nodeId);
+      const node = prev.find((n) => n.id === selectedNodeId);
       if (node) setClipboard({ ...node, data: { ...node.data } } as EasyFlowNode);
       return prev;
     });
     showToast?.('info', 'Node copied');
-  }, [showToast]);
+  }, [selectedNodeId, showToast]);
 
   const handlePasteNode = useCallback(() => {
     if (!clipboard) return;
@@ -369,10 +407,9 @@ function WorkflowEditorInner({
   }, [clipboard, showToast]);
 
   const handleDuplicateNode = useCallback(() => {
-    const nodeId = selectedNodeIdRef.current;
-    if (!nodeId) return;
+    if (!selectedNodeId) return;
     setNodes((prev) => {
-      const node = prev.find((n) => n.id === nodeId);
+      const node = prev.find((n) => n.id === selectedNodeId);
       if (!node) return prev;
       const newId = generateNodeId();
       const duplicate: Node = {
@@ -386,7 +423,7 @@ function WorkflowEditorInner({
       return [...prev, duplicate];
     });
     showToast?.('success', 'Node duplicated');
-  }, [showToast]);
+  }, [selectedNodeId, showToast]);
 
   const handleDeleteEdge = useCallback(() => {
     if (!selectedEdgeId) return;
@@ -396,14 +433,19 @@ function WorkflowEditorInner({
     showToast?.('info', t('toasts.edgeDeleted', 'Edge deleted'));
   }, [selectedEdgeId, showToast, t]);
 
-  const onConnect = useCallback(
-    (connection: Connection) => {
-      setEdges((eds) =>
-        addEdge({ ...connection, type: 'smoothstep', animated: true, style: { stroke: 'var(--ef-primary, #2563eb)' } }, eds)
-      );
-    },
-    []
-  );
+  const onConnect = useCallback((connection: Connection) => {
+    setEdges((eds) =>
+      addEdge(
+        {
+          ...connection,
+          type: 'smoothstep',
+          animated: true,
+          style: { stroke: 'var(--ef-primary, #2563eb)' },
+        },
+        eds
+      )
+    );
+  }, []);
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     setSelectedNodeId(node.id);
@@ -427,17 +469,33 @@ function WorkflowEditorInner({
     const handleKeyDown = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-      if ((e.ctrlKey || e.metaKey) && e.key === 'c') { e.preventDefault(); handleCopyNode(); }
-      if ((e.ctrlKey || e.metaKey) && e.key === 'v') { e.preventDefault(); handlePasteNode(); }
-      if ((e.ctrlKey || e.metaKey) && e.key === 'd') { e.preventDefault(); handleDuplicateNode(); }
-      if (e.key === 'Delete' || e.key === 'Backspace') {
-        if (selectedNodeIdRef.current) { e.preventDefault(); handleDeleteNode(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+        e.preventDefault();
+        handleCopyNode();
       }
-      if (e.key === 'Escape') { setSelectedNodeId(null); setSelectedEdgeId(null); setPanelMode('palette'); }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+        e.preventDefault();
+        handlePasteNode();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+        e.preventDefault();
+        handleDuplicateNode();
+      }
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (selectedNodeId) {
+          e.preventDefault();
+          handleDeleteNode();
+        }
+      }
+      if (e.key === 'Escape') {
+        setSelectedNodeId(null);
+        setSelectedEdgeId(null);
+        setPanelMode('palette');
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleCopyNode, handlePasteNode, handleDuplicateNode, handleDeleteNode]);
+  }, [handleCopyNode, handlePasteNode, handleDuplicateNode, handleDeleteNode, selectedNodeId]);
 
   const handleSave = useCallback(async () => {
     if (!onSave) return;
@@ -447,21 +505,21 @@ function WorkflowEditorInner({
         id: workflowId,
         name: workflowName || t('workflow.untitled', 'Untitled Workflow'),
         type: workflowType,
-        nodes: nodesRef.current as EasyFlowNode[],
-        edges: edgesRef.current as EasyFlowEdge[],
+        nodes: localizedNodes as EasyFlowNode[],
+        edges: edges as EasyFlowEdge[],
       });
       showToast?.('success', t('toasts.saveSuccess', 'Workflow saved'));
     } finally {
       setIsSaving(false);
     }
-  }, [onSave, workflowId, workflowName, workflowType, showToast, t]);
+  }, [onSave, workflowId, workflowName, workflowType, localizedNodes, edges, showToast, t]);
 
   const handleSync = useCallback(async () => {
     if (!adapter?.syncCards) return;
     setIsSyncing(true);
     try {
       await adapter.syncCards();
-      const cards = await adapter.getCards?.() || [];
+      const cards = (await adapter.getCards?.()) || [];
       setAvailableCards(cards);
       showToast?.('success', t('toasts.syncSuccess', 'Sync completed'));
     } catch {
@@ -472,7 +530,11 @@ function WorkflowEditorInner({
   }, [adapter, showToast, t]);
 
   const handleReset = useCallback(() => {
-    if (nodes.length > 0 && !window.confirm(t('buttons.confirmReset', 'Are you sure you want to reset everything?'))) return;
+    if (
+      localizedNodes.length > 0 &&
+      !window.confirm(t('buttons.confirmReset', 'Are you sure you want to reset everything?'))
+    )
+      return;
     setNodes([]);
     setEdges([]);
     reset();
@@ -480,14 +542,17 @@ function WorkflowEditorInner({
     setSelectedEdgeId(null);
     setPanelMode('palette');
     showToast?.('info', t('toasts.reset', 'Workflow reset'));
-  }, [nodes.length, reset, showToast, t]);
+  }, [localizedNodes.length, reset, showToast, t]);
 
   const handleValidate = useCallback(() => {
     if (onValidate && workflowId) onValidate(workflowId);
   }, [onValidate, workflowId]);
 
   const handleExecute = useCallback(() => {
-    if (onExecute && workflowId) { setIsExecuting(true); onExecute(workflowId); }
+    if (onExecute && workflowId) {
+      setIsExecuting(true);
+      onExecute(workflowId);
+    }
   }, [onExecute, workflowId]);
 
   const resolvedEditor = useMemo(() => {
@@ -499,31 +564,92 @@ function WorkflowEditorInner({
   // Build the effective actions list
   const effectiveActions: WorkflowActionItem[] = useMemo(() => {
     if (actions && actions.length > 0) return actions;
-    // Default: Save + Reset
-    return [
+    // Default: Sync (if available) + Reset + Save + Validate + Execute
+    const defaults: WorkflowActionItem[] = [
       {
         key: 'reset',
         label: t('buttons.reset', 'Reset'),
         icon: '🗑️',
         variant: 'secondary',
-        onClick: () => { handleReset(); },
+        onClick: () => {
+          handleReset();
+        },
       },
       {
         key: 'save',
-        label: isSaving
-          ? t('buttons.saving', 'Saving...')
-          : t('buttons.save', 'Save'),
+        label: isSaving ? t('buttons.saving', 'Saving...') : t('buttons.save', 'Save'),
         icon: '💾',
         variant: 'primary',
-        onClick: async () => { await handleSave(); },
+        onClick: async () => {
+          await handleSave();
+        },
         disabled: isSaving,
       },
     ];
-  }, [actions, isSaving, t, handleSave, handleReset]);
+    if (adapter?.syncCards) {
+      defaults.unshift({
+        key: 'sync',
+        label: isSyncing ? t('buttons.syncing', 'Syncing...') : t('buttons.sync', 'Update cards'),
+        icon: '🔄',
+        variant: 'warning',
+        onClick: () => {
+          void handleSync();
+        },
+        disabled: isSyncing,
+      });
+    }
+    if (onValidate && workflowId) {
+      defaults.push({
+        key: 'validate',
+        label: t('buttons.validate', 'Validate'),
+        icon: '✅',
+        variant: 'info',
+        onClick: () => handleValidate(),
+      });
+    }
+    if (onExecute && workflowId) {
+      defaults.push({
+        key: 'execute',
+        label: isExecuting
+          ? t('buttons.executing', 'Executing...')
+          : t('buttons.execute', 'Execute'),
+        icon: '🚀',
+        variant: 'success',
+        onClick: () => handleExecute(),
+        disabled: isExecuting,
+      });
+    }
+    if (onBack) {
+      defaults.unshift({
+        key: 'back',
+        label: t('buttons.back', 'Back'),
+        icon: '←',
+        variant: 'secondary',
+        onClick: () => onBack(),
+      });
+    }
+    return defaults;
+  }, [
+    actions,
+    isSaving,
+    isSyncing,
+    isExecuting,
+    t,
+    handleSave,
+    handleReset,
+    handleSync,
+    handleValidate,
+    handleExecute,
+    adapter,
+    onValidate,
+    onExecute,
+    onBack,
+    workflowId,
+  ]);
 
   if (isLoading) {
     return (
-    <div className={`ef-root ${styles.container}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className={`ef-root ${styles.container}`} dir={isRTL ? 'rtl' : 'ltr'}>
         <div className={styles.loading}>
           <div className={styles.spinner} />
           <p>{t('workflow.loading', 'Loading workflow...')}</p>
@@ -539,12 +665,23 @@ function WorkflowEditorInner({
           <h1 className={styles.title}>
             {t('workflow.titleEdit', 'Edit Workflow')}
             <span className={styles.metaText}>
-              ({nodes.length} {t('workflow.nodes', 'nodes')} • {edges.length} {t('workflow.edges', 'edges')})
+              ({localizedNodes.length} {t('workflow.nodes', 'nodes')} • {edges.length}{' '}
+              {t('workflow.edges', 'edges')})
             </span>
           </h1>
           <div className={styles.subtitle}>
-            <input type="text" className={styles.titleInput} placeholder={t('workflow.untitled', 'Untitled Workflow')} value={workflowName} onChange={(e) => setWorkflowName(e.target.value)} />
-            <select className={styles.typeSelect} value={workflowType} onChange={(e) => setWorkflowType(e.target.value)}>
+            <input
+              type="text"
+              className={styles.titleInput}
+              placeholder={t('workflow.untitled', 'Untitled Workflow')}
+              value={workflowName}
+              onChange={(e) => setWorkflowName(e.target.value)}
+            />
+            <select
+              className={styles.typeSelect}
+              value={workflowType}
+              onChange={(e) => setWorkflowType(e.target.value)}
+            >
               <option value="general">General</option>
               <option value="campaign">Campaign</option>
               <option value="automation">Automation</option>
@@ -565,8 +702,8 @@ function WorkflowEditorInner({
                     workflowId,
                     name: workflowName || t('workflow.untitled', 'Untitled Workflow'),
                     type: workflowType,
-                    nodes: nodesRef.current as EasyFlowNode[],
-                    edges: edgesRef.current as EasyFlowEdge[],
+                    nodes: localizedNodes as EasyFlowNode[],
+                    edges: edges as EasyFlowEdge[],
                     adapter,
                   })
                 }
@@ -576,20 +713,53 @@ function WorkflowEditorInner({
               </button>
             ))}
 
-          {toolbarActions.filter((a) => !a.hidden).map((action) => (
-            <button key={action.key} className={`ef-btn ef-btn-${action.variant || 'secondary'}`} onClick={action.onClick} disabled={action.disabled}>
-              {action.icon && `${action.icon} `}{action.label}
-            </button>
-          ))}
+          {toolbarActions
+            .filter((a) => !a.hidden)
+            .map((action) => (
+              <button
+                key={action.key}
+                className={`ef-btn ef-btn-${action.variant || 'secondary'}`}
+                onClick={action.onClick}
+                disabled={action.disabled}
+              >
+                {action.icon && `${action.icon} `}
+                {action.label}
+              </button>
+            ))}
         </div>
       </header>
 
       <div className={styles.editor}>
         <section className={styles.canvas}>
-          <Canvas nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} onConnect={onConnect} onNodeClick={onNodeClick} onEdgeClick={onEdgeClick} onPaneClick={onPaneClick} nodeStatuses={nodeStatuses} />
+          <Canvas
+            nodes={localizedNodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onNodeClick={onNodeClick}
+            onEdgeClick={onEdgeClick}
+            onPaneClick={onPaneClick}
+            nodeStatuses={nodeStatuses}
+          />
         </section>
-        <aside className={`${styles.panel} ${panelMode === 'palette' ? styles.panelPalette : styles.panelEditor}`}>
-          <NodeEditorPanel mode={panelMode} cards={availableCards} selectedNode={selectedNode as unknown as EasyFlowNode | null} selectedEdge={selectedEdge as unknown as EasyFlowEdge | null} onAddNode={handleAddNode} onUpdateNode={handleUpdateNode} onDeleteNode={handleDeleteNode} onCancelEdit={handleCancelEdit} onDeleteEdge={handleDeleteEdge} onSetMode={setPanelMode} customEditor={resolvedEditor} variableSuggestions={variableSuggestions} />
+        <aside
+          className={`${styles.panel} ${panelMode === 'palette' ? styles.panelPalette : styles.panelEditor}`}
+        >
+          <NodeEditorPanel
+            mode={panelMode}
+            cards={effectiveCards}
+            selectedNode={selectedNode as unknown as EasyFlowNode | null}
+            selectedEdge={selectedEdge as unknown as EasyFlowEdge | null}
+            onAddNode={handleAddNode}
+            onUpdateNode={handleUpdateNode}
+            onDeleteNode={handleDeleteNode}
+            onCancelEdit={handleCancelEdit}
+            onDeleteEdge={handleDeleteEdge}
+            onSetMode={setPanelMode}
+            customEditor={resolvedEditor}
+            variableSuggestions={variableSuggestions}
+          />
         </aside>
       </div>
     </div>

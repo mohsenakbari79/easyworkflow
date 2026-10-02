@@ -6,13 +6,12 @@
  * `status` field from the `nodeStatuses` map.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import {
   ReactFlow,
   Background,
   Controls,
   MiniMap,
-  addEdge,
   type Connection,
   type Edge,
   type Node,

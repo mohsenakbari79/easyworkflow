@@ -10,7 +10,7 @@
 
 ![easyworkflow editor preview](assets/easyflow-preview.png)
 
-*Screenshot placeholder — replace with an animated GIF or embed a live demo link when available.*
+_Screenshot placeholder — replace with an animated GIF or embed a live demo link when available._
 
 Try the bundled example:
 
@@ -108,11 +108,9 @@ const myAdapter: APIAdapter = {
   getCards: () => Promise.resolve(myCards),
 
   // Optional
-  syncCards: () =>
-    Promise.resolve({ created: 0, updated: 0, total: myCards.length }),
+  syncCards: () => Promise.resolve({ created: 0, updated: 0, total: myCards.length }),
 
-  loadWorkflow: (id) =>
-    fetch(`/api/workflows/${id}`).then((r) => r.json()),
+  loadWorkflow: (id) => fetch(`/api/workflows/${id}`).then((r) => r.json()),
 
   saveWorkflow: (wf) =>
     fetch('/api/workflows', {
@@ -127,8 +125,7 @@ const myAdapter: APIAdapter = {
   executeWorkflow: (id) =>
     fetch(`/api/workflows/${id}/execute`, { method: 'POST' }).then(() => undefined),
 
-  getWorkflowStatus: (id) =>
-    fetch(`/api/workflows/${id}/status`).then((r) => r.json()),
+  getWorkflowStatus: (id) => fetch(`/api/workflows/${id}/status`).then((r) => r.json()),
 };
 
 export function Editor() {
@@ -177,7 +174,7 @@ import { WorkflowEditor } from '@malevin/easyworkflow';
       visible: hasPermission,
     },
   ]}
-/>
+/>;
 ```
 
 Append extra buttons without replacing defaults via `toolbarActions`:
@@ -236,7 +233,7 @@ RTL is applied automatically for Arabic, Persian, Hebrew, Urdu, and others.
   --ef-border-color: #e2e8f0;
 }
 
-[data-theme="dark"] {
+[data-theme='dark'] {
   --ef-bg: #0b1120;
   --ef-card-bg: #111827;
   --ef-text-color: #f1f5f9;
@@ -249,53 +246,54 @@ Full variable reference: `src/styles/easyflow.css`.
 
 ### Components
 
-| Export | Description |
-|---|---|
-| `WorkflowEditor` | Main editor (canvas + palette + node editor) |
-| `Canvas` | React Flow wrapper |
-| `FlowNode` | Node component (rect / ellipse / diamond / downtriangle) |
-| `Palette` | Hierarchical card palette |
-| `NodeEditorPanel` | Side panel (palette / node editor / edge info) |
-| `BaseNodeEditor` | Default form-based node editor |
-| `SchemaDrivenEditor` | Auto-forms from JSON Schema |
-| `Toolbar` | Standalone toolbar |
-| `EasyFlowI18nProvider` | i18n context provider |
+| Export                 | Description                                              |
+| ---------------------- | -------------------------------------------------------- |
+| `WorkflowEditor`       | Main editor (canvas + palette + node editor)             |
+| `Canvas`               | React Flow wrapper                                       |
+| `FlowNode`             | Node component (rect / ellipse / diamond / downtriangle) |
+| `Palette`              | Hierarchical card palette                                |
+| `NodeEditorPanel`      | Side panel (palette / node editor / edge info)           |
+| `BaseNodeEditor`       | Default form-based node editor                           |
+| `SchemaDrivenEditor`   | Auto-forms from JSON Schema                              |
+| `Toolbar`              | Standalone toolbar                                       |
+| `EasyFlowI18nProvider` | i18n context provider                                    |
 
 ### Hooks
 
-| Export | Description |
-|---|---|
-| `useWorkflow` | State management for nodes, edges, metadata |
-| `useTranslation` | i18n hook returning `{ t, locale, isRTL }` |
+| Export           | Description                                 |
+| ---------------- | ------------------------------------------- |
+| `useWorkflow`    | State management for nodes, edges, metadata |
+| `useTranslation` | i18n hook returning `{ t, locale, isRTL }`  |
 
 ### Registries
 
-| Export | Description |
-|---|---|
+| Export               | Description                          |
+| -------------------- | ------------------------------------ |
 | `nodeEditorRegistry` | Register custom editors by node type |
-| `nodeShapeRegistry` | Register custom node shapes |
+| `nodeShapeRegistry`  | Register custom node shapes          |
 
 ### Utilities
 
-| Export | Description |
-|---|---|
-| `generateNodeId` / `generateEdgeId` | Unique ID generators |
-| `buildCategoryTree` | Build hierarchy from cards |
-| `normalizeCategoryKey` | Lowercase + trim category keys |
-| `humanizeCategoryLabel` | Title-case a category key |
-| `pickLocalized` | Pick value from an `_i18n` map |
-| `isRTLLocale` | RTL detection for any locale |
+| Export                              | Description                    |
+| ----------------------------------- | ------------------------------ |
+| `generateNodeId` / `generateEdgeId` | Unique ID generators           |
+| `buildCategoryTree`                 | Build hierarchy from cards     |
+| `normalizeCategoryKey`              | Lowercase + trim category keys |
+| `humanizeCategoryLabel`             | Title-case a category key      |
+| `pickLocalized`                     | Pick value from an `_i18n` map |
+| `isRTLLocale`                       | RTL detection for any locale   |
 
 ### Adapters
 
-| Export | Description |
-|---|---|
-| `emptyAdapter` | Empty adapter for demos and tests |
-| `noopAdapter` | Deprecated alias of `emptyAdapter` |
+| Export         | Description                        |
+| -------------- | ---------------------------------- |
+| `emptyAdapter` | Empty adapter for demos and tests  |
+| `noopAdapter`  | Deprecated alias of `emptyAdapter` |
 
 ## Credits
 
 Built on top of:
+
 - [@xyflow/react](https://github.com/xyflow/xyflow) — MIT License
 - [React](https://react.dev) — MIT License
 

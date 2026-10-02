@@ -87,7 +87,9 @@ export function Toolbar({
         <h1 className={styles.title}>
           {t('workflow.titleEdit', 'Edit Workflow')}
           <span className={styles.metaText}>
-            {' '}({nodeCount} {t('workflow.nodes', 'nodes')} • {edgeCount} {t('workflow.edges', 'edges')})
+            {' '}
+            ({nodeCount} {t('workflow.nodes', 'nodes')} • {edgeCount} {t('workflow.edges', 'edges')}
+            )
           </span>
         </h1>
         <div className={styles.subtitle}>

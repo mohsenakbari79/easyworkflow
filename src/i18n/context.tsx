@@ -12,7 +12,7 @@
  * ```
  */
 
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import en from './translations/en';
 import type { TranslationKeys } from './translations/en';
@@ -52,7 +52,10 @@ function getNestedValue(obj: Record<string, unknown>, path: string): string | un
 /**
  * Deep-merge `source` into `target`, preferring source values.
  */
-function deepMerge(target: Record<string, unknown>, source: Record<string, unknown>): Record<string, unknown> {
+function deepMerge(
+  target: Record<string, unknown>,
+  source: Record<string, unknown>
+): Record<string, unknown> {
   const result = { ...target };
   for (const key of Object.keys(source)) {
     if (
@@ -62,7 +65,10 @@ function deepMerge(target: Record<string, unknown>, source: Record<string, unkno
       target[key] &&
       typeof target[key] === 'object'
     ) {
-      result[key] = deepMerge(target[key] as Record<string, unknown>, source[key] as Record<string, unknown>);
+      result[key] = deepMerge(
+        target[key] as Record<string, unknown>,
+        source[key] as Record<string, unknown>
+      );
     } else if (source[key] !== undefined) {
       result[key] = source[key];
     }
@@ -109,7 +115,9 @@ export function EasyFlowI18nProvider({
 
   const t = useMemo(() => {
     return (path: string, fallback?: string): string => {
-      return getNestedValue(mergedTranslations as Record<string, unknown>, path) || fallback || path;
+      return (
+        getNestedValue(mergedTranslations as Record<string, unknown>, path) || fallback || path
+      );
     };
   }, [mergedTranslations]);
 

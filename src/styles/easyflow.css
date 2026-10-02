@@ -57,7 +57,7 @@
   --ef-shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.05);
   --ef-shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
   --ef-shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
-  --ef-shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.10), 0 8px 10px -6px rgba(15, 23, 42, 0.06);
+  --ef-shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.06);
   --ef-shadow-focus: 0 0 0 3px var(--ef-primary-ring);
 
   /* Radii */
@@ -100,7 +100,7 @@
 }
 
 /* ---------- Dark Theme ---------- */
-[data-theme="dark"] {
+[data-theme='dark'] {
   --ef-primary-soft: rgba(99, 102, 241, 0.15);
   --ef-success-soft: rgba(16, 185, 129, 0.15);
   --ef-warning-soft: rgba(245, 158, 11, 0.15);
@@ -155,7 +155,7 @@
   padding-right: env(safe-area-inset-right, 0);
 }
 
-.ef-root[dir="rtl"] {
+.ef-root[dir='rtl'] {
   direction: rtl;
   font-family: var(--ef-font-family-fa);
 }
@@ -223,8 +223,12 @@
   background: var(--ef-primary);
   color: #fff;
 }
-.ef-btn-primary:hover:not(:disabled) { background: var(--ef-primary-hover); }
-.ef-btn-primary:active:not(:disabled) { background: var(--ef-primary-active); }
+.ef-btn-primary:hover:not(:disabled) {
+  background: var(--ef-primary-hover);
+}
+.ef-btn-primary:active:not(:disabled) {
+  background: var(--ef-primary-active);
+}
 
 .ef-btn-secondary {
   background: var(--ef-bg);
@@ -240,25 +244,33 @@
   background: var(--ef-info);
   color: #fff;
 }
-.ef-btn-info:hover:not(:disabled) { background: var(--ef-info-hover); }
+.ef-btn-info:hover:not(:disabled) {
+  background: var(--ef-info-hover);
+}
 
 .ef-btn-success {
   background: var(--ef-success);
   color: #fff;
 }
-.ef-btn-success:hover:not(:disabled) { background: var(--ef-success-hover); }
+.ef-btn-success:hover:not(:disabled) {
+  background: var(--ef-success-hover);
+}
 
 .ef-btn-danger {
   background: var(--ef-danger);
   color: #fff;
 }
-.ef-btn-danger:hover:not(:disabled) { background: var(--ef-danger-hover); }
+.ef-btn-danger:hover:not(:disabled) {
+  background: var(--ef-danger-hover);
+}
 
 .ef-btn-warning {
   background: var(--ef-warning);
   color: #fff;
 }
-.ef-btn-warning:hover:not(:disabled) { background: var(--ef-warning-hover); }
+.ef-btn-warning:hover:not(:disabled) {
+  background: var(--ef-warning-hover);
+}
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {

@@ -5,6 +5,7 @@ Thanks for your interest in contributing! This document explains how to set up t
 ## Development setup
 
 Requirements:
+
 - Node.js 20+ (Node 22/24 recommended)
 - npm (the repo ships an `package-lock.json`; do not commit yarn/pnpm lockfiles)
 
@@ -31,16 +32,16 @@ examples/basic/  # Runnable demo app
 
 ## Scripts
 
-| Command | Purpose |
-|---|---|
-| `npm run build` | Build the library (ESM + CJS + d.ts) |
-| `npm run dev` | Watch-mode library build |
-| `npm run typecheck` | TypeScript type checking (`tsc --noEmit`) |
-| `npm test` | Run unit/component tests (Vitest) |
-| `npm run test:watch` | Watch mode for tests |
-| `npm run test:coverage` | Coverage report with thresholds |
-| `npm run lint` | ESLint + Prettier check |
-| `npm run lint:fix` | Auto-fix lint/format issues |
+| Command                 | Purpose                                   |
+| ----------------------- | ----------------------------------------- |
+| `npm run build`         | Build the library (ESM + CJS + d.ts)      |
+| `npm run dev`           | Watch-mode library build                  |
+| `npm run typecheck`     | TypeScript type checking (`tsc --noEmit`) |
+| `npm test`              | Run unit/component tests (Vitest)         |
+| `npm run test:watch`    | Watch mode for tests                      |
+| `npm run test:coverage` | Coverage report with thresholds           |
+| `npm run lint`          | ESLint + Prettier check                   |
+| `npm run lint:fix`      | Auto-fix lint/format issues               |
 
 ## Coding standards
 
@@ -77,6 +78,7 @@ npm run typecheck && npm run lint && npm test && npm run build
 ## Reporting bugs
 
 Please include:
+
 - easyworkflow version and React / @xyflow/react versions
 - Minimal reproduction steps or a sandbox link
 - Expected vs actual behavior

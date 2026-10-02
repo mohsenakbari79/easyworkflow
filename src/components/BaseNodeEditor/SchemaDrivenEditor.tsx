@@ -21,19 +21,10 @@ interface SchemaDrivenEditorProps {
 }
 
 /**
- * Map operator codes to display symbols (e.g. `eq` → `=`).
- */
-function getOperatorLabel(op: string): string {
-  const map: Record<string, string> = {
-    eq: '=', neq: '≠', gt: '>', gte: '≥', lt: '<', lte: '≤',
-    between: '↔', in: '∈', not_in: '∉', contains: '⊃', not_contains: '⊅',
-    starts_with: '⌕', ends_with: '⌔',
-  };
-  return map[op] || op;
-}
-
-/**
  * Renders a single schema-driven form field.
+ *
+ * Note: operator symbol mapping lives in `getOperatorLabel` for future
+ * operator-type fields; currently unused by the default field renderer.
  */
 function SchemaField({
   name,
@@ -96,7 +87,9 @@ function SchemaField({
           className={styles.input}
           type="number"
           value={(value as number) ?? ''}
-          onChange={(e) => onChange(name, e.target.value === '' ? undefined : Number(e.target.value))}
+          onChange={(e) =>
+            onChange(name, e.target.value === '' ? undefined : Number(e.target.value))
+          }
         />
       </div>
     );
