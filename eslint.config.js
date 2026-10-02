@@ -13,6 +13,7 @@ export default tseslint.config(
       'examples/**',
       'storybook-static/**',
       'e2e/**',
+      '.storybook/**',
       '*.config.ts',
       'vite.config.ts',
       'vitest.config.ts',

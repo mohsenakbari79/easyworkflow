@@ -6,6 +6,8 @@ node_modules/
 # Build output
 dist/
 build/
+storybook-static/
+coverage/
 *.tsbuildinfo
 
 # Environment
@@ -40,5 +42,3 @@ Desktop.ini
 *.temp
 output.txt
 *.tgz
-dist/
-coverage/
