@@ -303,6 +303,33 @@ All dependencies are MIT licensed. This package is compatible with commercial us
 
 Contributions are welcome. See [CONTRIBUTING.md](./CONTRIBUTING.md) for setup, testing, and pull-request guidelines.
 
+### Development scripts
+
+```bash
+npm install
+npm run typecheck      # TypeScript
+npm run lint           # ESLint + Prettier check
+npm run lint:fix       # Auto-fix lint/format
+npm test               # Vitest unit + component + integration tests
+npm run test:watch     # Watch mode
+npm run test:coverage  # Coverage with 60% thresholds
+npm run build          # Library build (ESM + CJS + d.ts)
+npm run storybook      # Storybook dev server (port 6006)
+npm run e2e            # Playwright E2E (uses system Chromium by default)
+```
+
+### Testing overview
+
+| Layer       | Location                                                                                        | What it covers                                         |
+| ----------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| Unit        | `src/__tests__/utils.test.ts`, `registry.test.ts`, `useWorkflow.test.tsx`, `edges.test.tsx`     | Pure helpers, registries, hook reducer, edge defaults  |
+| Component   | `FlowNode.test.tsx`, `Toolbar.test.tsx`, `Canvas.edges.test.tsx`, `SchemaDrivenEditor.test.tsx` | Node/Toolbar/Canvas/edge UI inside `ReactFlowProvider` |
+| Integration | `integration.workflow.test.tsx` + `src/test/mocks/mockAdapter.ts`                               | Save/load through `WorkflowEditor` + in-memory adapter |
+| E2E         | `e2e/workflow.spec.ts`                                                                          | Drag/connect/save + load in a real browser             |
+| Storybook   | `src/**/*.stories.tsx`                                                                          | Interactive docs for core components                   |
+
+React Flow consumers are wrapped in `ReactFlowProvider`. Edge assertions use `waitFor` because edge rendering depends on async node measurement. Playwright targets system Chromium when the Playwright CDN is unavailable (`PLAYWRIGHT_CHROMIUM_EXECUTABLE` overrides the path).
+
 ## License
 
 MIT © Mohsen Akbari. See [LICENSE](./LICENSE) for details.

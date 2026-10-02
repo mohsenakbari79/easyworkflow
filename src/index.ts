@@ -18,7 +18,11 @@ export * from './utils';
 
 // Features — workflow editor
 export { WorkflowEditor } from './features/workflow-editor';
-export type { ToolbarAction, WorkflowActionItem } from './features/workflow-editor';
+export type {
+  ToolbarAction,
+  WorkflowActionItem,
+  WorkflowEditorProps,
+} from './features/workflow-editor';
 
 // Features — nodes
 export { FlowNode } from './features/nodes';
@@ -28,11 +32,16 @@ export { EasyFlowEdge, defaultEdgeOptions, connectionLineStyle } from './feature
 
 // Components (presentational shells)
 export { Canvas } from './components/Canvas';
+export type { CanvasProps } from './components/Canvas';
 export { Palette } from './components/Palette';
+export type { PaletteProps } from './components/Palette';
 export { BaseNodeEditor } from './components/BaseNodeEditor';
+export type { BaseNodeEditorProps } from './components/BaseNodeEditor';
 export { SchemaDrivenEditor } from './components/BaseNodeEditor/SchemaDrivenEditor';
 export { NodeEditorPanel } from './components/NodeEditorPanel';
+export type { NodeEditorPanelProps, PanelMode } from './components/NodeEditorPanel';
 export { Toolbar } from './components/Toolbar';
+export type { ToolbarProps } from './components/Toolbar';
 
 // i18n
 export { EasyFlowI18nProvider } from './i18n/context';
