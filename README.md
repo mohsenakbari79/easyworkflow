@@ -9,18 +9,28 @@
 [![Node version](https://img.shields.io/node/v/@malevin/easyworkflow)](https://www.npmjs.com/package/@malevin/easyworkflow)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 
+## Live Demo
+
+**👉 [Open the live demo](https://mohsenakbari79.github.io/easyworkflow/)**
+
+Drag cards from the palette onto the canvas, connect nodes, and click Save. The demo is built from `examples/basic` and deployed to GitHub Pages on every push to `main`.
+
 ## Demo
 
 ![easyworkflow editor preview](assets/easyflow-preview.png)
 
-_Screenshot placeholder — replace with an animated GIF or embed a live demo link when available._
-
-Try the bundled example:
+_Run the bundled example locally:_
 
 ```bash
 cd examples/basic
 npm install
 npm run dev
+```
+
+Or from the repo root, build the GitHub Pages demo:
+
+```bash
+npm run build:demo
 ```
 
 ## Key features
