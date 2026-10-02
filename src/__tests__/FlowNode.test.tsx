@@ -6,7 +6,7 @@ import React from 'react';
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
-import { FlowNode } from '../components/FlowNode';
+import { FlowNode } from '../features/nodes';
 import type { EasyFlowNodeData } from '../types';
 
 /** Minimal valid NodeProps for the memoized FlowNode component. */

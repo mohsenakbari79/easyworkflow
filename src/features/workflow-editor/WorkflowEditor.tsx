@@ -11,8 +11,8 @@ import { useWorkflow } from '../../hooks/useWorkflow';
 import { useTranslation } from '../../hooks/useTranslation';
 import { generateNodeId } from '../../utils/nodeId';
 import { pickLocalized } from '../../utils/localization';
-import { Canvas } from '../Canvas';
-import { NodeEditorPanel, type PanelMode } from '../NodeEditorPanel';
+import { Canvas } from '../../components/Canvas';
+import { NodeEditorPanel, type PanelMode } from '../../components/NodeEditorPanel';
 import styles from './WorkflowEditor.module.css';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {

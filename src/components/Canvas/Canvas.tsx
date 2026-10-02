@@ -19,25 +19,13 @@ import {
   type OnEdgesChange,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { FlowNode } from '../FlowNode';
+import { FlowNode } from '../../features/nodes';
+import { defaultEdgeOptions, connectionLineStyle } from '../../features/edges';
 import type { EasyFlowNodeData } from '../../types/node';
 import styles from './Canvas.module.css';
 
 const nodeTypes = {
   easyFlowNode: FlowNode,
-};
-
-/** Default visual options applied to every new edge. */
-const defaultEdgeOptions = {
-  type: 'smoothstep',
-  animated: true,
-  style: { stroke: 'var(--ef-primary, #6366f1)' },
-};
-
-/** Line style used while dragging a connection. */
-const connectionLineStyle = {
-  stroke: 'var(--ef-primary, #6366f1)',
-  strokeWidth: 2,
 };
 
 /**

@@ -16,10 +16,17 @@ export * from './types';
 export { nodeEditorRegistry, nodeShapeRegistry } from './registry';
 export * from './utils';
 
-// Components
-export { WorkflowEditor } from './components/WorkflowEditor';
-export type { ToolbarAction, WorkflowActionItem } from './components/WorkflowEditor';
-export { FlowNode } from './components/FlowNode';
+// Features — workflow editor
+export { WorkflowEditor } from './features/workflow-editor';
+export type { ToolbarAction, WorkflowActionItem } from './features/workflow-editor';
+
+// Features — nodes
+export { FlowNode } from './features/nodes';
+
+// Features — edges (new exports; existing names unchanged)
+export { EasyFlowEdge, defaultEdgeOptions, connectionLineStyle } from './features/edges';
+
+// Components (presentational shells)
 export { Canvas } from './components/Canvas';
 export { Palette } from './components/Palette';
 export { BaseNodeEditor } from './components/BaseNodeEditor';
@@ -33,6 +40,6 @@ export type { Locale, EasyFlowI18nProviderProps } from './i18n/context';
 export { en, fa, RTL_LOCALES } from './i18n';
 export { isRTLLocale } from './i18n/locales';
 
-// API
-export { emptyAdapter, noopAdapter } from './api';
-export type { APIAdapter as APIAdapterType } from './api';
+// Adapters
+export { emptyAdapter, noopAdapter } from './adapters';
+export type { APIAdapter as APIAdapterType } from './adapters';
