@@ -2,6 +2,11 @@
  * Pick the best localized value from a map of locale -> string.
  *
  * Resolution order: exact locale → base locale → 'en' → 'fa' → any value → fallback.
+ *
+ * @param locale - Active locale code (e.g. `en`, `fa-IR`).
+ * @param values - Locale-keyed map, or a plain string (returned as-is).
+ * @param fallback - Value returned when nothing matches.
+ * @returns The best matching string.
  */
 export function pickLocalized(
   locale: string,
@@ -28,6 +33,10 @@ export function pickLocalized(
  *
  * Example: extractLocalizedMap({ name: 'Default', name_en: 'Hello', name_fa: 'سلام' }, 'name')
  *   => { default: 'Default', en: 'Hello', fa: 'سلام' }
+ *
+ * @param source - Source object containing base and `_locale`-suffixed keys.
+ * @param baseField - Base field name (e.g. `name`).
+ * @returns A map of locale code → string value.
  */
 export function extractLocalizedMap(
   source: Record<string, unknown>,
@@ -51,6 +60,12 @@ export function extractLocalizedMap(
 
 /**
  * Build a localized node data object from a locale map.
+ *
+ * @param locale - Active locale code.
+ * @param data - Source node/card data object.
+ * @param labelKey - Base field name for labels (default `label`).
+ * @param descKey - Base field name for descriptions (default `description`).
+ * @returns A shallow copy of `data` with localized label/description fields.
  */
 export function localizeNodeData(
   locale: string,

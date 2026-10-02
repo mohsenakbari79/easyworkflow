@@ -1,3 +1,10 @@
+/**
+ * Searchable hierarchical card palette.
+ *
+ * Builds a category tree from `CardDefinition.category` paths (dot-separated),
+ * supports live search, and calls `onAddNode` when a card is clicked.
+ */
+
 import React, { useCallback, useState, useMemo } from 'react';
 import type { CardDefinition, CardCategoryNode } from '../../types/card';
 import { buildCategoryTree, humanizeCategoryLabel } from '../../utils/category';
@@ -15,6 +22,10 @@ interface CategoryTreeProps {
   searchQuery: string;
 }
 
+/**
+ * Check whether a card matches a free-text search query.
+ * Matches against display names, card key, description, and category.
+ */
 function matchesSearch(card: CardDefinition, query: string): boolean {
   if (!query) return true;
   const q = query.toLowerCase();
@@ -22,6 +33,7 @@ function matchesSearch(card: CardDefinition, query: string): boolean {
     card.display_name,
     card.display_name_en,
     card.display_name_fa,
+    card.display_name_i18n ? Object.values(card.display_name_i18n).join(' ') : undefined,
     card.card_key,
     card.description,
     card.description_en,
@@ -31,6 +43,10 @@ function matchesSearch(card: CardDefinition, query: string): boolean {
   return fields.some((f) => f!.toLowerCase().includes(q));
 }
 
+/**
+ * Filter a category tree to cards/children that match `query`.
+ * Empty categories are pruned entirely.
+ */
 function filterTree(
   items: CardCategoryNode[],
   query: string
@@ -50,6 +66,9 @@ function filterTree(
     .filter(Boolean) as CardCategoryNode[];
 }
 
+/**
+ * Resolve the best display name for a card under the active locale.
+ */
 function getDisplayName(locale: string, card: CardDefinition): string {
   const map: Record<string, string> = {
     ...(card.display_name_i18n || {}),
@@ -60,6 +79,9 @@ function getDisplayName(locale: string, card: CardDefinition): string {
   return pickLocalized(locale, map, card.card_key);
 }
 
+/**
+ * Resolve the best description for a card under the active locale.
+ */
 function getDescription(locale: string, card: CardDefinition): string {
   const map: Record<string, string> = {
     ...(card.description_i18n || {}),
@@ -70,6 +92,9 @@ function getDescription(locale: string, card: CardDefinition): string {
   return pickLocalized(locale, map, '');
 }
 
+/**
+ * Recursive category tree renderer used internally by {@link Palette}.
+ */
 function CategoryTree({
   items,
   level = 0,
@@ -154,11 +179,24 @@ function CategoryTree({
   );
 }
 
+/**
+ * Props for {@link Palette}.
+ */
 export interface PaletteProps {
+  /** Card definitions to display. */
   cards: CardDefinition[];
+  /** Called when the user clicks a card to add it to the canvas. */
   onAddNode: (card: CardDefinition) => void;
 }
 
+/**
+ * Hierarchical, searchable palette of workflow cards.
+ *
+ * @example
+ * ```tsx
+ * <Palette cards={cards} onAddNode={(card) => addNode(card)} />
+ * ```
+ */
 export function Palette({ cards, onAddNode }: PaletteProps) {
   const { t, locale } = useTranslation();
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});

@@ -1,3 +1,11 @@
+/**
+ * React Flow canvas wrapper used by {@link WorkflowEditor}.
+ *
+ * Configures default edge options (smoothstep + animation + stroke color),
+ * snap-to-grid, minimap, controls, and background. Enriches nodes with a
+ * `status` field from the `nodeStatuses` map.
+ */
+
 import React, { useCallback } from 'react';
 import {
   ReactFlow,
@@ -20,29 +28,61 @@ const nodeTypes = {
   easyFlowNode: FlowNode,
 };
 
+/** Default visual options applied to every new edge. */
 const defaultEdgeOptions = {
   type: 'smoothstep',
   animated: true,
   style: { stroke: 'var(--ef-primary, #6366f1)' },
 };
 
+/** Line style used while dragging a connection. */
 const connectionLineStyle = {
   stroke: 'var(--ef-primary, #6366f1)',
   strokeWidth: 2,
 };
 
+/**
+ * Props for {@link Canvas}.
+ */
 export interface CanvasProps {
+  /** Current React Flow nodes. */
   nodes: Node[];
+  /** Current React Flow edges. */
   edges: Edge[];
+  /** Node change handler (drag, select, remove). */
   onNodesChange: OnNodesChange;
+  /** Edge change handler (select, remove). */
   onEdgesChange: OnEdgesChange;
+  /** Called when a new connection is established. */
   onConnect: (connection: Connection) => void;
+  /** Optional node click handler. */
   onNodeClick?: (event: React.MouseEvent, node: Node) => void;
+  /** Optional edge click handler. */
   onEdgeClick?: (event: React.MouseEvent, edge: Edge) => void;
+  /** Optional pane (background) click handler. */
   onPaneClick?: () => void;
+  /** Optional map of node id → execution status used for glow styling. */
   nodeStatuses?: Record<string, string>;
 }
 
+/**
+ * Workflow canvas with minimap, controls, and default edge styling.
+ *
+ * Must be rendered inside a `ReactFlowProvider` (or `WorkflowEditor`).
+ *
+ * @example
+ * ```tsx
+ * <ReactFlowProvider>
+ *   <Canvas
+ *     nodes={nodes}
+ *     edges={edges}
+ *     onNodesChange={onNodesChange}
+ *     onEdgesChange={onEdgesChange}
+ *     onConnect={onConnect}
+ *   />
+ * </ReactFlowProvider>
+ * ```
+ */
 export function Canvas({
   nodes,
   edges,

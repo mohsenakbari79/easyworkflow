@@ -3,7 +3,12 @@ import { I18nContext, isRTLLocale } from '../i18n/context';
 
 /**
  * Access the current i18n context.
- * @returns {{ t, locale, isRTL, translations }}
+ *
+ * @returns An object with:
+ * - `t(path, fallback?)` — dotted-key lookup with optional fallback
+ * - `locale` — active locale code
+ * - `isRTL` — whether the locale requires right-to-left layout
+ * - `translations` — merged translation dictionary
  */
 export function useTranslation() {
   const context = useContext(I18nContext);

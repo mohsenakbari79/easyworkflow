@@ -70,8 +70,13 @@ const initialState: WorkflowState = {
   isDirty: false,
 };
 
+/**
+ * Options accepted by {@link useWorkflow}.
+ */
 export interface UseWorkflowOptions {
+  /** Optional backend adapter (reserved for future persistence hooks). */
   adapter?: APIAdapter;
+  /** Locale used when resolving card labels into node data. */
   locale?: string;
 }
 
@@ -94,6 +99,21 @@ function buildCardLocaleMap(
   return map;
 }
 
+/**
+ * State-management hook for workflow nodes, edges, and metadata.
+ *
+ * Wraps a reducer-based state machine with helpers for adding/removing
+ * nodes, setting metadata/statuses, loading a workflow, and computing
+ * variable suggestion tokens from trigger output schemas.
+ *
+ * @param options - Adapter and locale options.
+ * @returns Workflow state plus mutation helpers.
+ *
+ * @example
+ * ```tsx
+ * const { state, addNode, setNodes, setEdges } = useWorkflow({ locale: 'en' });
+ * ```
+ */
 export function useWorkflow(options: UseWorkflowOptions = {}) {
   const { adapter, locale = 'en' } = options;
   const [state, dispatch] = useReducer(workflowReducer, initialState);

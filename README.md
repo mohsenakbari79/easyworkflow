@@ -1,410 +1,251 @@
 # easyworkflow
 
-> A fully configurable, i18n-ready visual workflow editor for React.
-> Drag-and-drop nodes, custom editors, adapter-based backend, MIT licensed.
+> A fully configurable, i18n-ready visual workflow editor for React — drag-and-drop nodes, custom editors, adapter-based backend, MIT licensed.
+
 [![npm version](https://img.shields.io/npm/v/@malevin/easyworkflow.svg)](https://www.npmjs.com/package/@malevin/easyworkflow)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 
-<p align="center">
-  <img src="assets/easyflow-preview.png" alt="easyworkflow editor preview" width="100%" />
-</p>
+## Demo
 
----
+![easyworkflow editor preview](assets/easyflow-preview.png)
 
-## Why easyworkflow?
+*Screenshot placeholder — replace with an animated GIF or embed a live demo link when available.*
 
-- Full editor in 15 minutes - not 5 days of building from scratch
-- Built-in i18n with automatic RTL for fa / ar / he / ur
-- Backend-agnostic - plug any API via the adapter pattern
-- Themable with CSS variables and dark mode out of the box
-- Extensible - register custom node editors and shapes
-- MIT licensed - no vendor lock-in, forever free
+Try the bundled example:
 
----
+```bash
+cd examples/basic
+npm install
+npm run dev
+```
 
-## Installation
+## Key features
 
-    npm install @malevin/easyworkflow @xyflow/react
+- **Visual editor** — React Flow canvas with snap-to-grid, minimap, and controls
+- **Drag-and-drop palette** — searchable hierarchical categories built from card definitions
+- **Custom node editors** — register per-node-type editors via `nodeEditorRegistry`
+- **Schema-driven forms** — auto-generate parameter forms from JSON Schema `parameters_schema`
+- **Adapter pattern** — plug any backend through `APIAdapter` (`getCards`, `saveWorkflow`, `loadWorkflow`, …)
+- **i18n + RTL** — locale-keyed card labels; automatic RTL for `ar`, `fa`, `he`, `ur`, and more
+- **Configurable toolbar** — pass your own `actions` or extend defaults with `toolbarActions`
+- **Theming** — CSS variables and dark mode via `[data-theme="dark"]`
+- **Keyboard shortcuts** — copy (Ctrl+C), paste (Ctrl+V), duplicate (Ctrl+D), delete, Escape
+- **MIT licensed** — no vendor lock-in
+
+## Quick start
+
+### Installation
+
+```bash
+npm install @malevin/easyworkflow @xyflow/react
+```
 
 `@xyflow/react` is a peer dependency and must be installed separately.
 
----
+### Minimal working example
 
-## Quick Start (under 15 minutes)
+```tsx
+import { WorkflowEditor, EasyFlowI18nProvider, emptyAdapter } from '@malevin/easyworkflow';
+import type { APIAdapter, CardDefinition } from '@malevin/easyworkflow';
+import '@malevin/easyworkflow/styles';
 
-### Step 1 - Import the library
+const cards: CardDefinition[] = [
+  {
+    id: 1,
+    card_key: 'start',
+    node_type: 'control.start',
+    display_name: 'Start',
+    display_name_i18n: { en: 'Start', fa: 'شروع' },
+    icon: '🟢',
+    category: 'control',
+    ui_config: { shape: 'ellipse', color: '#10b981', size: 'small' },
+  },
+];
 
-    import { WorkflowEditor, EasyFlowI18nProvider, emptyAdapter } from 'easyworkflow';
-    import 'easyworkflow/styles';
+const adapter: APIAdapter = {
+  getCards: () => Promise.resolve(cards),
+  saveWorkflow: (wf) => Promise.resolve({ id: 'local', ...wf }),
+};
 
-### Step 2 - Define your cards
+export default function App() {
+  return (
+    <EasyFlowI18nProvider locale="en">
+      <div style={{ height: '100vh' }}>
+        <WorkflowEditor adapter={adapter} />
+      </div>
+    </EasyFlowI18nProvider>
+  );
+}
+```
 
-    import type { CardDefinition } from 'easyworkflow';
+You now have a working editor with a drag-and-drop canvas, searchable palette, built-in node editor, Save/Reset toolbar, and optional RTL.
 
-    const cards: CardDefinition[] = [
-      {
-        id: 1,
-        card_key: 'start',
-        node_type: 'control.start',
-        display_name: 'Start',
-        display_name_i18n: {
-          en: 'Start',
-          fa: 'شروع',
-          ar: 'بدء',
-          tr: 'Başlat',
-        },
-        icon: '🟢',
-        category: 'control',
-        ui_config: { shape: 'ellipse', color: '#10b981', size: 'small' },
-      },
-      {
-        id: 2,
-        card_key: 'filter.age',
-        node_type: 'filter.age',
-        display_name: 'Age Filter',
-        display_name_i18n: {
-          en: 'Age Filter',
-          fa: 'فیلتر سن',
-          ar: 'فلتر العمر',
-          tr: 'Yaş Filtresi',
-        },
-        icon: '🔢',
-        category: 'filters',
-        ui_config: { shape: 'rectangle', color: '#6366f1', size: 'medium' },
-        parameters_schema: {
-          properties: {
-            min_age: { type: 'integer', title: 'Min Age' },
-            max_age: { type: 'integer', title: 'Max Age' },
-          },
-        },
-      },
-    ];
+## Advanced examples
 
-### Step 3 - Render the editor
+### Custom adapter (backend integration)
 
-    import { WorkflowEditor, EasyFlowI18nProvider, emptyAdapter } from 'easyworkflow';
-    import 'easyworkflow/styles';
-    import type { APIAdapter, CardDefinition } from 'easyworkflow';
+The adapter is the single source of truth for cards and persistence:
 
-    const myCards: CardDefinition[] = [
-      {
-        id: 1,
-        card_key: 'start',
-        node_type: 'control.start',
-        display_name: 'Start',
-        display_name_i18n: { en: 'Start', fa: 'شروع' },
-        icon: '🟢',
-        category: 'control',
-        ui_config: { shape: 'ellipse', color: '#10b981', size: 'small' },
-      },
-    ];
+```tsx
+import type { APIAdapter, CardDefinition } from '@malevin/easyworkflow';
 
-    const myAdapter: APIAdapter = {
-      getCards: () => Promise.resolve(myCards),
-      saveWorkflow: (wf) => {
-        console.log('Saved:', wf);
-        return Promise.resolve({ id: 'local', ...wf });
-      },
-    };
+const myCards: CardDefinition[] = [
+  {
+    id: 1,
+    card_key: 'control.start',
+    node_type: 'control.start',
+    display_name: 'Start',
+    display_name_i18n: { en: 'Start', fa: 'شروع', ar: 'بدء' },
+    icon: '🟢',
+    category: 'control',
+    ui_config: { shape: 'ellipse', color: '#10b981', size: 'small' },
+  },
+];
 
-    export default function App() {
-      return (
-        <EasyFlowI18nProvider locale="fa">
-          <div style={{ height: '100vh' }}>
-            <WorkflowEditor adapter={myAdapter} />
-          </div>
-        </EasyFlowI18nProvider>
-      );
-    }
+const myAdapter: APIAdapter = {
+  // REQUIRED — cards appear in the palette
+  getCards: () => Promise.resolve(myCards),
 
-### Step 4 - Run
+  // Optional
+  syncCards: () =>
+    Promise.resolve({ created: 0, updated: 0, total: myCards.length }),
 
-Run `npm run dev`. You now have a working workflow editor with:
-- Drag-and-drop canvas
-- Hierarchical card palette with search
-- Built-in node editor
-- Save / Reset toolbar
-- Automatic RTL when locale is set to fa, ar, he, or ur
+  loadWorkflow: (id) =>
+    fetch(`/api/workflows/${id}`).then((r) => r.json()),
 
----
+  saveWorkflow: (wf) =>
+    fetch('/api/workflows', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(wf),
+    }).then((r) => r.json()),
 
-## Cards and Adapters
+  validateWorkflow: (id) =>
+    fetch(`/api/workflows/${id}/validate`, { method: 'POST' }).then((r) => r.json()),
 
-The adapter is the single source of truth for cards. Define your cards inside
-`getCards`, and put save/execute logic right next to it.
+  executeWorkflow: (id) =>
+    fetch(`/api/workflows/${id}/execute`, { method: 'POST' }).then(() => undefined),
 
-### Build your own adapter
+  getWorkflowStatus: (id) =>
+    fetch(`/api/workflows/${id}/status`).then((r) => r.json()),
+};
 
-Create an adapter that supplies your cards and talks to your backend:
-
-    import type { APIAdapter, CardDefinition } from 'easyworkflow';
-
-    const myCards: CardDefinition[] = [
-      {
-        id: 1,
-        card_key: 'control.start',
-        node_type: 'control.start',
-        display_name: 'Start',
-        display_name_i18n: { en: 'Start', fa: 'شروع', ar: 'بدء' },
-        icon: '🟢',
-        category: 'control',
-        ui_config: { shape: 'ellipse', color: '#10b981', size: 'small' },
-      },
-      // ... more cards
-    ];
-
-    const cardsAdapter: APIAdapter = {
-      // REQUIRED for cards to appear:
-      getCards: () => Promise.resolve(myCards),
-
-      // Optional:
-      syncCards: () =>
-        Promise.resolve({ created: 0, updated: 0, total: myCards.length }),
-
-      loadWorkflow: (id) =>
-        fetch(`/api/workflows/${id}`).then((r) => r.json()),
-
-      saveWorkflow: (wf) =>
-        fetch('/api/workflows', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(wf),
-        }).then((r) => r.json()),
-
-      validateWorkflow: (id) =>
-        fetch(`/api/workflows/${id}/validate`, { method: 'POST' }).then((r) =>
-          r.json()
-        ),
-
-      executeWorkflow: (id) =>
-        fetch(`/api/workflows/${id}/execute`, { method: 'POST' }).then(
-          () => undefined
-        ),
-
-      getWorkflowStatus: (id) =>
-        fetch(`/api/workflows/${id}/status`).then((r) => r.json()),
-    };
-
-Then pass it to the editor:
-
-    <WorkflowEditor adapter={cardsAdapter} onSave={(wf) => console.log(wf)} />
-
-### Static-only usage (no backend)
-
-If you only want to show cards and don't need backend calls, use a minimal
-adapter:
-
-    const staticAdapter: APIAdapter = {
-      getCards: () => Promise.resolve(myCards),
-      saveWorkflow: (wf) => {
-        console.log('Saved:', wf);
-        return Promise.resolve({ id: 'local', ...wf });
-      },
-    };
-
-    <WorkflowEditor adapter={staticAdapter} />
-
----
-
-## Features
-
-| Feature | Description |
-|---|---|
-| Visual editor | React Flow canvas with snap-to-grid, minimap, controls |
-| Palette | Searchable hierarchical categories from card `category` |
-| Custom editors | Register per-node-type editors via `nodeEditorRegistry` |
-| Schema forms | Auto-generated forms from JSON Schema `parameters_schema` |
-| i18n | `_i18n` maps on cards; any number of locales |
-| RTL | Auto-detected for ar, fa, he, ur, yi, dv, ps, sd |
-| Adapter pattern | Plug your own backend via `APIAdapter` |
-| Dark mode | Via `[data-theme="dark"]` on any ancestor |
-| Keyboard | Copy (Ctrl+C), Paste (Ctrl+V), Duplicate (Ctrl+D), Delete |
-
----
-
-## Backend Integration
-
-Implement `APIAdapter` to connect your backend:
-
-    import type { APIAdapter } from 'easyworkflow';
-
-    const myAdapter: APIAdapter = {
-      getCards: () => fetch('/api/cards').then((r) => r.json()),
-      syncCards: () =>
-        fetch('/api/cards/sync', { method: 'POST' }).then((r) => r.json()),
-      loadWorkflow: (id) =>
-        fetch(`/api/workflows/${id}`).then((r) => r.json()),
-      saveWorkflow: (wf) =>
-        fetch('/api/workflows', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(wf),
-        }).then((r) => r.json()),
-      validateWorkflow: (id) =>
-        fetch(`/api/workflows/${id}/validate`, { method: 'POST' }).then((r) =>
-          r.json()
-        ),
-      executeWorkflow: (id) =>
-        fetch(`/api/workflows/${id}/execute`, { method: 'POST' }).then(
-          () => undefined
-        ),
-    };
-
-    <WorkflowEditor adapter={myAdapter} />;
-
-If you do not need a backend, use the bundled `emptyAdapter`.
-
----
-
-## Custom Node Editors
-
-Register a component for a specific node type or pattern:
-
-    import { nodeEditorRegistry } from 'easyworkflow';
-    import { MyFilterEditor } from './MyFilterEditor';
-
-    nodeEditorRegistry.register(
-      'my-filter-editor',
-      (nodeType) => nodeType.startsWith('filter.'),
-      MyFilterEditor
-    );
-
-The editor receives `{ node, onUpdate, onDelete, onCancel, variableSuggestions }`.
-
----
-
-## Toolbar Actions
-
-By default, only a **Save** button is shown. To fully control the toolbar,
-pass an `actions` array. Each action defines its own label, icon, variant,
-and onClick handler — just like `cards`.
-
-    import { WorkflowEditor } from 'easyworkflow';
-
+export function Editor() {
+  return (
     <WorkflowEditor
-      adapter={cardsAdapter}
-      actions={[
-        {
-          key: 'save',
-          label: 'Save Draft',
-          icon: '💾',
-          variant: 'primary',
-          onClick: async (ctx) => {
-            await api.saveDraft(ctx);
-          },
-        },
-        {
-          key: 'publish',
-          label: 'Publish',
-          icon: '🚀',
-          variant: 'success',
-          onClick: async (ctx) => {
-            await api.publish(ctx);
-          },
-        },
-        {
-          key: 'discard',
-          label: 'Discard',
-          icon: '🗑️',
-          variant: 'danger',
-          onClick: () => {
-            if (confirm('Discard changes?')) location.reload();
-          },
-        },
-      ]}
+      adapter={myAdapter}
+      onSave={(wf) => console.log('Saved payload:', wf)}
+      onExecute={(id) => console.log('Execute:', id)}
+      onValidate={(id) => console.log('Validate:', id)}
     />
+  );
+}
+```
 
-The `onClick` callback receives:
+For demos or tests without a backend, use the bundled `emptyAdapter`.
 
+### Events and toolbar actions
+
+By default the editor renders Save + Reset. Pass `actions` to fully control the toolbar:
+
+```tsx
+import { WorkflowEditor } from '@malevin/easyworkflow';
+
+<WorkflowEditor
+  adapter={myAdapter}
+  actions={[
     {
-      workflowId: string | undefined;
-      name: string;             // current workflow name
-      type: string;             // current workflow type
-      nodes: EasyFlowNode[];    // current nodes
-      edges: EasyFlowEdge[];    // current edges
-      adapter: APIAdapter | undefined;
-    }
-
-### Disable or hide a single action
-
+      key: 'save',
+      label: 'Save Draft',
+      icon: '💾',
+      variant: 'primary',
+      onClick: async (ctx) => {
+        // ctx: { workflowId, name, type, nodes, edges, adapter }
+        console.log('Saving', ctx.nodes.length, 'nodes');
+      },
+    },
     {
       key: 'publish',
       label: 'Publish',
-      onClick: publish,
-      disabled: !isValid,     // grey out
-      visible: hasPermission, // remove entirely when false
-    }
-
-### Add extra buttons without replacing defaults
-
-Use `toolbarActions` to append buttons after `actions`:
-
-    <WorkflowEditor
-      toolbarActions={[
-        {
-          key: 'export',
-          label: 'Export JSON',
-          icon: '📤',
-          variant: 'secondary',
-          onClick: () => downloadJSON(),
-        },
-      ]}
-    />
-
-### Default behavior
-
-If you don't pass `actions`, the editor renders a single Save button that
-uses the built-in save handler.
-
----
-
-## Internationalization
-
-Add any number of locales per card:
-
-    display_name_i18n: {
-      en: 'Gender Filter',
-      fa: 'فیلتر جنسیت',
-      ar: 'فلتر الجنس',
-      tr: 'Cinsiyet Filtresi',
-      de: 'Geschlechtsfilter',
+      icon: '🚀',
+      variant: 'success',
+      onClick: async (ctx) => {
+        await api.publish(ctx);
+      },
+      disabled: !isValid,
+      visible: hasPermission,
     },
+  ]}
+/>
+```
 
-Change locale:
+Append extra buttons without replacing defaults via `toolbarActions`:
 
-    <EasyFlowI18nProvider locale="ar">
+```tsx
+<WorkflowEditor
+  adapter={myAdapter}
+  toolbarActions={[
+    {
+      key: 'export',
+      label: 'Export JSON',
+      icon: '📤',
+      variant: 'secondary',
+      onClick: () => downloadJSON(),
+    },
+  ]}
+/>
+```
+
+### Custom node editors
+
+```tsx
+import { nodeEditorRegistry } from '@malevin/easyworkflow';
+import { MyFilterEditor } from './MyFilterEditor';
+
+nodeEditorRegistry.register(
+  'my-filter-editor',
+  (nodeType) => nodeType.startsWith('filter.'),
+  MyFilterEditor
+);
+```
+
+The editor component receives `{ node, onUpdate, onDelete, onCancel, variableSuggestions }`.
+
+### Internationalization
+
+```tsx
+display_name_i18n: {
+  en: 'Gender Filter',
+  fa: 'فیلتر جنسیت',
+  ar: 'فلتر الجنس',
+}
+
+<EasyFlowI18nProvider locale="ar">
+```
 
 RTL is applied automatically for Arabic, Persian, Hebrew, Urdu, and others.
 
----
+### Theming
 
-## Theming
+```css
+:root {
+  --ef-primary: #6366f1;
+  --ef-bg: #ffffff;
+  --ef-text-color: #0f172a;
+  --ef-border-color: #e2e8f0;
+}
 
-Override CSS variables to match your brand:
-
-    :root {
-      --ef-primary: #6366f1;
-      --ef-bg: #ffffff;
-      --ef-bg-subtle: #f8fafc;
-      --ef-text-color: #0f172a;
-      --ef-border-color: #e2e8f0;
-      --ef-radius-md: 8px;
-    }
-
-Dark mode:
-
-    [data-theme="dark"] {
-      --ef-bg: #0b1120;
-      --ef-card-bg: #111827;
-      --ef-text-color: #f1f5f9;
-    }
+[data-theme="dark"] {
+  --ef-bg: #0b1120;
+  --ef-card-bg: #111827;
+  --ef-text-color: #f1f5f9;
+}
+```
 
 Full variable reference: `src/styles/easyflow.css`.
 
----
-
-## API Reference
+## API reference
 
 ### Components
 
@@ -450,26 +291,20 @@ Full variable reference: `src/styles/easyflow.css`.
 | Export | Description |
 |---|---|
 | `emptyAdapter` | Empty adapter for demos and tests |
-
----
+| `noopAdapter` | Deprecated alias of `emptyAdapter` |
 
 ## Credits
 
 Built on top of:
-- [@xyflow/react](https://github.com/xyflow/xyflow) - MIT License
-- [React](https://react.dev) - MIT License
+- [@xyflow/react](https://github.com/xyflow/xyflow) — MIT License
+- [React](https://react.dev) — MIT License
 
 All dependencies are MIT licensed. This package is compatible with commercial use.
 
----
+## Contributing
+
+Contributions are welcome. See [CONTRIBUTING.md](./CONTRIBUTING.md) for setup, testing, and pull-request guidelines.
 
 ## License
 
-MIT (c) mohsen akbari
-See [LICENSE](./LICENSE) for details.
-
----
-
-## Contributing
-
-Contributions are welcome. Please open an issue first to discuss changes.
+MIT © Mohsen Akbari. See [LICENSE](./LICENSE) for details.

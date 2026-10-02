@@ -2,6 +2,7 @@
  * easyworkflow
  * A fully configurable, i18n-ready visual workflow editor for React.
  *
+ * @packageDocumentation
  * @license MIT
  * @see https://github.com/mohsenakbari79/easyworkflow
  */

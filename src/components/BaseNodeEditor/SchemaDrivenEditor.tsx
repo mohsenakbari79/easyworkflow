@@ -1,13 +1,28 @@
+/**
+ * Auto-generates form controls from a JSON-schema-like `ParameterSchema`.
+ *
+ * Supports string, number/integer, boolean, enum, and array fields.
+ */
+
 import React, { useMemo } from 'react';
 import type { ParameterSchema } from '../../types/node';
 import styles from './BaseNodeEditor.module.css';
 
+/**
+ * Props for {@link SchemaDrivenEditor}.
+ */
 interface SchemaDrivenEditorProps {
+  /** Schema describing the parameter fields to render. */
   schema: ParameterSchema;
+  /** Current parameter values keyed by property name. */
   values: Record<string, unknown>;
+  /** Called when a field value changes. */
   onChange: (field: string, value: unknown) => void;
 }
 
+/**
+ * Map operator codes to display symbols (e.g. `eq` → `=`).
+ */
 function getOperatorLabel(op: string): string {
   const map: Record<string, string> = {
     eq: '=', neq: '≠', gt: '>', gte: '≥', lt: '<', lte: '≤',
@@ -17,6 +32,9 @@ function getOperatorLabel(op: string): string {
   return map[op] || op;
 }
 
+/**
+ * Renders a single schema-driven form field.
+ */
 function SchemaField({
   name,
   schema,
@@ -116,6 +134,10 @@ function SchemaField({
   );
 }
 
+/**
+ * Renders form controls for every property in `schema.properties`.
+ * Returns `null` when the schema has no properties.
+ */
 export function SchemaDrivenEditor({ schema, values, onChange }: SchemaDrivenEditorProps) {
   const properties = useMemo(() => schema.properties || {}, [schema.properties]);
 

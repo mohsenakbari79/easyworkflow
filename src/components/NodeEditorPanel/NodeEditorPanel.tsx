@@ -1,3 +1,9 @@
+/**
+ * Right-side panel that switches between palette, node editor, and edge info.
+ *
+ * Mode is controlled by the parent (typically {@link WorkflowEditor}).
+ */
+
 import React from 'react';
 import type { EasyFlowNode, EasyFlowEdge } from '../../types/node';
 import type { NodeEditorComponent } from '../../types/editor';
@@ -7,23 +13,58 @@ import type { CardDefinition } from '../../types/card';
 import { useTranslation } from '../../hooks/useTranslation';
 import styles from './NodeEditorPanel.module.css';
 
+/** Which sub-panel is currently visible. */
 export type PanelMode = 'palette' | 'node' | 'edge';
 
+/**
+ * Props for {@link NodeEditorPanel}.
+ */
 export interface NodeEditorPanelProps {
+  /** Active panel mode. */
   mode: PanelMode;
+  /** Cards available in the palette. */
   cards: CardDefinition[];
+  /** Currently selected node (required when `mode === 'node'`). */
   selectedNode: EasyFlowNode | null;
+  /** Currently selected edge (required when `mode === 'edge'`). */
   selectedEdge: EasyFlowEdge | null;
+  /** Called when the user clicks a palette card. */
   onAddNode: (card: CardDefinition) => void;
+  /** Called when the node editor confirms changes. */
   onUpdateNode: (node: EasyFlowNode) => void;
+  /** Called when the user deletes the selected node. */
   onDeleteNode: () => void;
+  /** Called when the user cancels node editing. */
   onCancelEdit: () => void;
+  /** Called when the user deletes the selected edge. */
   onDeleteEdge: () => void;
+  /** Called to change the active panel mode. */
   onSetMode: (mode: PanelMode) => void;
+  /** Optional custom editor component for the selected node type. */
   customEditor?: NodeEditorComponent | null;
+  /** Optional variable suggestion tokens for the node editor. */
   variableSuggestions?: string[];
 }
 
+/**
+ * Side panel rendering palette, node editor, or edge info based on `mode`.
+ *
+ * @example
+ * ```tsx
+ * <NodeEditorPanel
+ *   mode="palette"
+ *   cards={cards}
+ *   selectedNode={null}
+ *   selectedEdge={null}
+ *   onAddNode={addNode}
+ *   onUpdateNode={updateNode}
+ *   onDeleteNode={deleteNode}
+ *   onCancelEdit={cancel}
+ *   onDeleteEdge={deleteEdge}
+ *   onSetMode={setMode}
+ * />
+ * ```
+ */
 export function NodeEditorPanel({
   mode,
   cards,

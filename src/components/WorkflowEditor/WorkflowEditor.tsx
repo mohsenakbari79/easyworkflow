@@ -32,13 +32,24 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
   }
 }
 
+/**
+ * Legacy toolbar action shape (no context object).
+ * @deprecated Prefer {@link WorkflowActionItem} via the `actions` prop.
+ */
 export interface ToolbarAction {
+  /** Unique React key. */
   key: string;
+  /** Button label. */
   label: string;
+  /** Optional emoji/icon shown before the label. */
   icon?: string;
+  /** Visual variant. */
   variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'warning' | 'info';
+  /** Click handler (no context argument). */
   onClick: () => void;
+  /** Optional disable flag. */
   disabled?: boolean;
+  /** Optional visibility flag. */
   hidden?: boolean;
 }
 
@@ -73,11 +84,19 @@ export interface WorkflowActionItem {
   visible?: boolean;
 }
 
+/**
+ * Props for {@link WorkflowEditor}.
+ */
 export interface WorkflowEditorProps {
+  /** Existing workflow id to load via `adapter.loadWorkflow`. Omit for a new workflow. */
   workflowId?: string;
+  /** Backend adapter supplying cards and persistence hooks. */
   adapter?: APIAdapter;
+  /** Fallback cards used when the adapter has no `getCards`. */
   initialCards?: CardDefinition[];
+  /** Active locale code (e.g. `en`, `fa`). Prefer `EasyFlowI18nProvider`. */
   locale?: string;
+  /** Additional custom node editors registered for this editor instance. */
   customEditors?: { match: string | ((nodeType: string) => boolean); component: NodeEditorComponent; key: string }[];
   /**
    * Define the toolbar actions. If omitted, only a default Save button renders.
@@ -86,13 +105,25 @@ export interface WorkflowEditorProps {
   actions?: WorkflowActionItem[];
   /** @deprecated Prefer `actions`. Legacy extra buttons appended after `actions`. */
   toolbarActions?: ToolbarAction[];
+  /**
+   * Called when the user triggers save. Receives the full workflow payload
+   * (nodes, edges, name, type, id) that would be sent to the adapter.
+   */
   onSave?: (workflow: { id?: string; name: string; type: string; nodes: EasyFlowNode[]; edges: EasyFlowEdge[] }) => void;
+  /** Called when the user triggers execute for an existing workflow. */
   onExecute?: (workflowId: string) => void;
+  /** Called when the user triggers validate for an existing workflow. */
   onValidate?: (workflowId: string) => void;
+  /** Optional Back navigation callback. */
   onBack?: () => void;
+  /** Optional toast presenter used for success/error feedback. */
   showToast?: (type: 'success' | 'error' | 'info' | 'warning', message: string) => void;
 }
 
+/**
+ * Internal editor implementation. Prefer {@link WorkflowEditor} which
+ * wraps this component in `ReactFlowProvider` and an error boundary.
+ */
 function WorkflowEditorInner({
   workflowId,
   adapter,
@@ -565,6 +596,11 @@ function WorkflowEditorInner({
   );
 }
 
+/**
+ * Public entry point for the full workflow editor.
+ * Renders {@link WorkflowEditorInner} inside an error boundary and
+ * `ReactFlowProvider`.
+ */
 export function WorkflowEditor(props: WorkflowEditorProps) {
   return (
     <ErrorBoundary>

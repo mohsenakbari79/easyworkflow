@@ -1,9 +1,17 @@
+/**
+ * Default EasyFlow node renderer.
+ *
+ * Renders colored headers, shape containers (rectangle, ellipse, diamond,
+ * downtriangle), status glow, and React Flow handles for binary operators.
+ */
+
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 import type { NodeProps } from '@xyflow/react';
 import styles from './FlowNode.module.css';
 import type { EasyFlowNodeData, NodeStatus } from '../../types/node';
 
+/** Status → glow color map used by {@link FlowNode}. */
 const statusColors: Record<string, string> = {
   completed: '#28a745',
   executed: '#28a745',
@@ -14,10 +22,20 @@ const statusColors: Record<string, string> = {
   notstarted: '#6c757d',
 };
 
+/**
+ * Resolve the glow color for a node status.
+ * @param status - Node execution status; defaults to `notstarted`.
+ */
 function getStatusColor(status?: NodeStatus): string {
   return statusColors[status || 'notstarted'] || '#6c757d';
 }
 
+/**
+ * Default node visual component (memoized).
+ *
+ * Receives standard `@xyflow/react` `NodeProps`. Node data is cast to
+ * `Partial<EasyFlowNodeData>` so missing fields fall back to defaults.
+ */
 function FlowNodeComponent({ data, selected }: NodeProps) {
   try {
     const nodeData = (data || {}) as Partial<EasyFlowNodeData>;
@@ -127,4 +145,7 @@ function FlowNodeComponent({ data, selected }: NodeProps) {
   }
 }
 
+/**
+ * Memoized EasyFlow node component suitable for `nodeTypes` registration.
+ */
 export const FlowNode = React.memo(FlowNodeComponent);

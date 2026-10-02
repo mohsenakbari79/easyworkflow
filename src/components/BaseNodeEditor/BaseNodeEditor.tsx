@@ -1,19 +1,50 @@
+/**
+ * Default form-based editor for a selected workflow node.
+ *
+ * Edits label/description (locale-aware) and optional schema-driven
+ * parameters. Used by {@link NodeEditorPanel} when no custom editor is
+ * registered for the node type.
+ */
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type { EasyFlowNode, EasyFlowNodeData, ParameterSchema } from '../../types/node';
 import { pickLocalized } from '../../utils/localization';
 import { useTranslation } from '../../hooks/useTranslation';
 import styles from './BaseNodeEditor.module.css';
 
+/**
+ * Props for {@link BaseNodeEditor}.
+ */
 export interface BaseNodeEditorProps {
+  /** Node being edited. */
   node: EasyFlowNode;
+  /** Called with the updated node when the user confirms. */
   onUpdate: (node: EasyFlowNode) => void;
+  /** Called when the user clicks Delete node. */
   onDelete: () => void;
+  /** Called when the user clicks Cancel. */
   onCancel: () => void;
+  /** Optional extra form sections rendered between the description and actions. */
   children?: React.ReactNode;
+  /** Optional `{{ payload.* }}` suggestion tokens. */
   variableSuggestions?: string[];
+  /** Optional custom parameter builder overriding schema/default extraction. */
   parameterBuilder?: (draft: Record<string, unknown>, node: EasyFlowNode) => Record<string, unknown>;
 }
 
+/**
+ * Default node editor form.
+ *
+ * @example
+ * ```tsx
+ * <BaseNodeEditor
+ *   node={node}
+ *   onUpdate={handleUpdate}
+ *   onDelete={handleDelete}
+ *   onCancel={handleCancel}
+ * />
+ * ```
+ */
 export function BaseNodeEditor({
   node,
   onUpdate,
