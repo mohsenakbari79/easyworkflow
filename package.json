@@ -1,6 +1,6 @@
 {
   "name": "@malevin/easyworkflow",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Build a workflow editor in 15 minutes - not 5 days of building from scratch. A customizable React component for node-based UIs with i18n/RTL support.",
   "publishConfig": {
     "access": "public"
